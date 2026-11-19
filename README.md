@@ -11,8 +11,6 @@
 - 附录使用 CAN201 名称，本仓库按任务书使用 CSI201；两者冲突时以任务书为准。
 - 任务书列出的截止时间为 **2026-12-10 23:59**，最终截止时间、ZIP 命名和官方 Docker 镜像标签以 Learning Mall 公告为准。
 
-本次只建立开发基础，不代表已完成课程系统或形成可提交成果。
-
 ## 仓库结构
 
 ```text
@@ -20,14 +18,14 @@ CSI201-CW1/
 ├── README.md                    # 项目导航、要求与开发计划
 ├── .editorconfig
 ├── .gitignore
-├── Dockerfile                   # 用户提供的 Python 3.12 环境定义
+├── Dockerfile                   # Python 3.12 开发环境定义
 ├── compose.yaml                 # 共享开发容器与源码挂载
 ├── .dockerignore                # 最小构建上下文
 ├── Codes/                       # 最终提交的代码目录
 │   ├── server.py                # 服务器命令行入口骨架
 │   ├── client.py                # 客户端命令行入口骨架
 │   ├── questions.json           # 开发题库：2 个 quiz，每个 5 题
-│   ├── questions_50.json        # 用户提供的题库：5 个 quiz，每个 10 题
+│   ├── questions_50.json        # 扩展题库：5 个 quiz，每个 10 题
 │   ├── README.md                # 启动接口、CLI 草案、假设和限制
 │   ├── common/                 # 预留：分帧、消息校验、公共常量
 │   ├── quiz_server/            # 预留：题库、会话、房间、计时与计分
@@ -52,7 +50,7 @@ CSI201-CW1/
 
 1. 只使用 Python 3.12 标准库，网络核心直接使用 `socket`；不能使用 `socketserver`、第三方框架或 `asyncio` 高层服务器 API，无运行时安装步骤。
 2. 客户端与服务器均为纯 CLI；包含或依赖 GUI 会导致 Part I 零分。
-3. 所有提交的验证、演示及测试证据必须来自教师提供的 Docker 镜像。不能以本机运行结果替代。仓库保留用户提供的 Docker 环境文件用于开发，但 Dockerfile 和镜像不纳入作业提交；正式环境身份仍以 Learning Mall 公告为准。
+3. 所有提交的验证、演示及测试证据必须来自教师提供的 Docker 镜像。正式环境以 Learning Mall 公告为准；仓库中的 Docker 配置用于开发，不纳入作业提交。
 4. 服务器完整验证题库后才能监听，监听成功后打印 `SERVER_READY`。端口由参数指定，不能硬编码。
 5. 仅服务器读取题库，客户端通过 TCP 获取信息；题目关闭前不得泄露正确答案，目录列表不得提前暴露题干和选项。
 6. 至少支持 10 个同时连接的客户端和 2 个独立运行的房间，正确处理 TCP 分片、合并、异常输入、断连和 Ctrl+C。
@@ -60,7 +58,7 @@ CSI201-CW1/
 
 ## 启动与开发
 
-完整参数、计划中的 CLI 命令和 Docker 使用方式见 [Codes/README.md](Codes/README.md)。已接入用户提供的 Docker 环境，可在仓库根目录执行：
+完整参数、计划中的 CLI 命令和 Docker 使用方式见 [Codes/README.md](Codes/README.md)。启动 Docker 后，在仓库根目录执行：
 
 ```bash
 docker compose up -d --build
@@ -70,8 +68,6 @@ docker compose exec python python3 client.py --help
 ```
 
 容器默认工作目录为 `/code/Codes`；多客户端通过 `docker compose exec` 共用一个容器。Dockerfile 和 Compose 仅是开发配置，当前业务功能仍未实现。
-
-容器中的 Python 与宿主机 Conda 隔离，终端显示 `(base)` 不影响上述命令。统一在容器中运行和测试，无需创建或修改 Conda 环境。若 macOS 找不到 `docker`，按 [运行说明](Codes/README.md) 设置当前终端 PATH。
 
 未来实现必须支持以下接口（在容器的 `/code/Codes` 目录执行；当前尚不能启动服务）：
 
@@ -116,19 +112,7 @@ python3 client.py --server <server_IP> --port <port> --id <user_id> --name <disp
 
 ### Git 仓库
 
-源码、题库、文档、`Dockerfile`、`compose.yaml`、`.dockerignore`、`.gitignore` 和 `.editorconfig` 均应纳入版本管理，以便组员克隆后重建开发环境。Docker 镜像和容器由本机 Docker 管理，不作为仓库文件上传。
-
-`AGENTS.md` 是本地规则文件，已忽略；Conda 本地目录 `.conda/`、虚拟环境、`.env`、缓存、日志以及 `compose.override.yaml` / `compose.override.yml` 等本机覆盖配置也已忽略。不要使用 `git add -f` 强制加入这些文件。
-
-提交前在仓库根目录检查：
-
-```bash
-git status --short
-git diff --check
-docker compose config --quiet
-```
-
-暂存后使用 `git diff --cached --stat` 和 `git diff --cached` 核对实际提交内容。Git 仓库包含开发资料，课程提交 ZIP 则只包含要求的交付文件。
+源码、题库、文档和开发配置纳入版本管理，供组员协作和重建环境。Git 仓库包含开发资料，课程提交 ZIP 只包含要求的交付文件。
 
 ### 课程提交 ZIP
 
@@ -136,4 +120,4 @@ docker compose config --quiet
 
 开发报告建议正文 12–18 页（不含封面、目录、参考文献与附录），A4 单栏、11 pt 正文、编号标题、页码、统一图注与 IEEE 引用。文档占 60 分，实现占 40 分；本作业占模块成绩 20%。视频不超过 10 分钟，展示 Tasks 1–5，每名成员均需参与。成员贡献比例须合计 100%。
 
-任务书允许受限制的 AI 编程辅助，要求成员理解、审查和验证使用的内容，并按学校要求注明 AI 工具；不得使用生成式 AI 制作提交用图片、图表、截图或其他视觉证据。初始化材料也需由团队审阅，真实测试结果和贡献记录留待实际工作后填写。
+任务书允许受限制的 AI 编程辅助，要求成员理解、审查和验证使用的内容，并按学校要求注明 AI 工具；不得使用生成式 AI 制作提交用图片、图表、截图或其他视觉证据。

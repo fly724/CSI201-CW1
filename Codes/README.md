@@ -1,42 +1,80 @@
-py# 运行与操作说明
+# 运行与操作说明
 
 **状态：初始化骨架，尚不可进行联网答题。** `server.py` 和 `client.py` 目前仅解析参数，支持 `--help`；普通运行会向 stderr 报告尚未实现并以状态 2 退出。没有任何功能测试通过的声明。
 
-## 环境
+## 开发环境
 
-正式运行使用 Learning Mall 发布的教师 Docker 镜像，内含 Python 3.12 标准库。镜像名称和标签尚未提供，不需要安装任何 Python 包。以下 Docker 命令是待官方镜像发布后使用的模板，并非已执行的验证记录。
+使用 Docker Compose 运行 Python 3.12 标准库环境，无需安装 Python 第三方包。
 
-在宿主机仓库根目录，填写官方镜像名称和标签后：
+| 配置 | 值 |
+| --- | --- |
+| 基础镜像 | `docker.m.daocloud.io/library/python:3.12-slim` |
+| 构建镜像 | `csi201-cw1:latest` |
+| Compose 服务名 | `python` |
+| 项目挂载路径 | `/code` |
+| 默认工作目录 | `/code/Codes` |
+
+容器保持运行，服务器和多个客户端通过独立的 `exec` 会话启动，在同一容器内通过 `127.0.0.1` 通信，无需发布端口。源码通过挂载共享，修改后无需重新构建镜像。
+
+启动 Docker 后，在仓库根目录执行：
 
 ```bash
-export EXAMINER_IMAGE='REPLACE_WITH_OFFICIAL_IMAGE_AND_TAG'
-docker run --rm -it --name csi201-cw1   --mount "type=bind,source=$(pwd),target=/submission"   --workdir /submission/Codes "$EXAMINER_IMAGE" sh
+docker compose config --quiet
+docker compose up -d --build
+docker compose exec python python3 --version
 ```
 
-该模板假定官方镜像支持 `sh`；具体入口和挂载方法以官方说明为准。后续在同一容器内开启客户端终端，因此示例使用 `127.0.0.1`，不需要发布宿主机端口。
+首次构建需要下载基础镜像。正式评估环境以 Learning Mall 公告为准，提交用测试与演示须在教师指定环境中完成。
+
+进入容器或停止环境：
+
+```bash
+docker compose exec python sh
+docker compose down
+```
+
+`down` 停止并移除容器及 Compose 网络，不删除挂载的项目文件。
 
 ## 启动接口
 
-在 `Codes/` 下，必须支持的精确接口为：
+程序必须支持以下接口，在容器的 `/code/Codes` 目录执行：
 
 ```text
 python3 server.py --host <server_IP> --port <port> --questions <json_path>
 python3 client.py --server <server_IP> --port <port> --id <user_id> --name <display_name>
 ```
 
-实现完成后，在容器终端运行服务器：
+以下 Compose 命令均在仓库根目录执行。当前可查看入口帮助：
 
 ```bash
-python3 server.py --host 127.0.0.1 --port 5000 --questions questions.json
+docker compose exec python python3 server.py --help
+docker compose exec python python3 client.py --help
 ```
 
-在另一宿主终端连接同一容器并启动客户端：
+实现完成后，在一个终端启动服务器：
 
 ```bash
-docker exec -it --workdir /submission/Codes csi201-cw1   python3 client.py --server 127.0.0.1 --port 5000 --id user01 --name Alice
+docker compose exec python python3 server.py --host 127.0.0.1 --port 5000 --questions questions_50.json
 ```
 
-重复启动不同 ID 的客户端即可进行多用户测试。`5000` 仅为示例值，用户可通过参数选择其他有效端口。预期服务器在**完成全量题库校验并开始监听后**输出 `SERVER_READY`；当前骨架不会输出此标志。
+在另外的终端分别启动客户端：
+
+```bash
+docker compose exec python python3 client.py --server 127.0.0.1 --port 5000 --id user01 --name Alice
+docker compose exec python python3 client.py --server 127.0.0.1 --port 5000 --id user02 --name Bob
+```
+
+`5000` 为示例端口。服务器应在完整验证题库并开始监听后输出 `SERVER_READY`。当前入口仅为骨架，上述运行命令会报告尚未实现并退出。
+
+题库可通过 `--questions` 切换：`questions.json` 含 2 套共 10 题，`questions_50.json` 含 5 套共 50 题。最终提交仍需包含有效的 `questions.json`。
+
+增加测试用例后执行：
+
+```bash
+docker compose exec -T python python3 -m unittest discover -s tests -p 'test_*.py' -v
+```
+
+测试计划见 [tests/README.md](tests/README.md)。当前没有测试用例，零条测试不代表功能验证通过。
 
 ## CLI 命令草案
 
