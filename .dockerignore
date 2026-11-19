@@ -1,0 +1,4 @@
+# The image needs no project files; source is bind-mounted at runtime.
+**
+!Dockerfile
+!.dockerignore

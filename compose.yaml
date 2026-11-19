@@ -1,0 +1,15 @@
+services:
+  python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: csi201-cw1:latest
+    pull_policy: never
+    working_dir: /code/Codes
+    volumes:
+      - .:/code
+    # Keep one shared environment running for server/client exec sessions.
+    entrypoint: ["sleep", "infinity"]
+    init: true
+    stdin_open: true
+    tty: true

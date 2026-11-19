@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "quizzes": [
+    {
+      "quiz_id": "network-basics",
+      "title": "Networking Fundamentals",
+      "description": "Introductory networking concepts",
+      "questions": [
+        {
+          "question_id": "NET001",
+          "text": "Which transport protocol provides reliable byte-stream delivery?",
+          "options": {
+            "A": "UDP",
+            "B": "TCP",
+            "C": "ARP",
+            "D": "ICMP"
+          },
+          "answer": "B",
+          "time_limit": 15,
+          "points": 100
+        },
+        {
+          "question_id": "NET002",
+          "text": "Which device forwards packets between IP networks?",
+          "options": {
+            "A": "Router",
+            "B": "Hub",
+            "C": "Repeater",
+            "D": "Patch panel"
+          },
+          "answer": "A",
+          "time_limit": 15,
+          "points": 100
+        },
+        {
+          "question_id": "NET003",
+          "text": "Which protocol maps a domain name to an IP address?",
+          "options": {
+            "A": "DHCP",
+            "B": "HTTP",
+            "C": "DNS",
+            "D": "FTP"
+          },
+          "answer": "C",
+          "time_limit": 15,
+          "points": 100
+        },
+        {
+          "question_id": "NET004",
+          "text": "How many bits are in an IPv4 address?",
+          "options": {
+            "A": "16",
+            "B": "32",
+            "C": "64",
+            "D": "128"
+          },
+          "answer": "B",
+          "time_limit": 15,
+          "points": 100
+        },
+        {
+          "question_id": "NET005",
+          "text": "Which layer provides end-to-end process communication?",
+          "options": {
+            "A": "Physical",
+            "B": "Data link",
+            "C": "Network",
+            "D": "Transport"
+          },
+          "answer": "D",
+          "time_limit": 15,
+          "points": 100
+        }
+      ]
+    },
+    {
+      "quiz_id": "tcp-python",
+      "title": "TCP and Python Sockets",
+      "description": "Byte streams and socket programming",
+      "questions": [
+        {
+          "question_id": "TCP001",
+          "text": "What does TCP provide to an application?",
+          "options": {
+            "A": "A reliable ordered byte stream",
+            "B": "Fixed-size JSON messages",
+            "C": "Only broadcast delivery",
+            "D": "A shared file system"
+          },
+          "answer": "A",
+          "time_limit": 15,
+          "points": 100
+        },
+        {
+          "question_id": "TCP002",
+          "text": "Which Python standard library module provides raw TCP sockets?",
+          "options": {
+            "A": "json",
+            "B": "argparse",
+            "C": "socket",
+            "D": "pathlib"
+          },
+          "answer": "C",
+          "time_limit": 15,
+          "points": 100
+        },
+        {
+          "question_id": "TCP003",
+          "text": "What does an empty bytes result from recv on a connected TCP socket indicate?",
+          "options": {
+            "A": "A new question",
+            "B": "The peer has closed its sending side",
+            "C": "A full message is buffered",
+            "D": "A successful login"
+          },
+          "answer": "B",
+          "time_limit": 15,
+          "points": 100
+        },
+        {
+          "question_id": "TCP004",
+          "text": "What byte order is conventionally used for network protocol integers?",
+          "options": {
+            "A": "Host-dependent order",
+            "B": "Little-endian only",
+            "C": "Random order",
+            "D": "Big-endian"
+          },
+          "answer": "D",
+          "time_limit": 15,
+          "points": 100
+        },
+        {
+          "question_id": "TCP005",
+          "text": "Which clock is appropriate for measuring quiz timeouts?",
+          "options": {
+            "A": "A formatted date string",
+            "B": "A calendar date",
+            "C": "A monotonic clock",
+            "D": "A timezone name"
+          },
+          "answer": "C",
+          "time_limit": 15,
+          "points": 100
+        }
+      ]
+    }
+  ]
+}

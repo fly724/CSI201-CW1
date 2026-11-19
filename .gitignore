@@ -1,0 +1,31 @@
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+# Python and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.conda/
+.pytest_cache/
+.coverage
+htmlcov/
+# Local secrets and generated output
+.env
+.env.*
+!.env.example
+*.log
+/tmp/
+/build/
+/dist/
+*.zip
+
+# Local agent instructions
+/AGENTS.md
+
+# Machine-specific Docker Compose overrides
+/compose.override.yaml
+/compose.override.yml
