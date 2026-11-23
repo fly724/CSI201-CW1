@@ -5,7 +5,7 @@ import socket
 from dataclasses import dataclass
 from uuid import uuid4
 
-from common.framing import encode, read_message
+from common import protocol
 from quiz_server.rooms import RequestError, RoomService
 
 ROOM_REQUESTS = {
@@ -13,6 +13,23 @@ ROOM_REQUESTS = {
     "LEAVE_ROOM_REQUEST", "READY_REQUEST", "START_QUIZ_REQUEST",
     "ANSWER_REQUEST", "LEADERBOARD_REQUEST", "PLAYER_LIST_REQUEST",
 }
+
+
+async def messages(sock):
+    """Adapt the shared incremental decoder to a nonblocking raw socket."""
+    reader = protocol.FrameReader()
+    loop = asyncio.get_running_loop()
+    while chunk := await loop.sock_recv(sock, 8192):
+        batch = []
+        try:
+            reader.feed(chunk, batch.append)
+        except protocol.ProtocolError:
+            # Deliver earlier, complete frames before closing the bad stream.
+            for message in batch:
+                yield message
+            return
+        for message in batch:
+            yield message
 
 
 @dataclass(frozen=True)
@@ -37,7 +54,7 @@ class Peer:
         if self.out.full():
             self.task.cancel()
             return False
-        self.out.put_nowait(encode(message))
+        self.out.put_nowait(protocol.encode_message(message))
         return True
 
     async def write(self):
@@ -64,8 +81,7 @@ class Server:
         peer = self.users.get(session.user_id)
         if peer is None or peer.session != session:
             return False
-        return peer.send(dict(version=1, type=kind, session_id=session.session_id,
-                              event_id=uuid4().hex, payload=payload))
+        return peer.send(protocol.build_event(kind, payload, uuid4().hex, session.session_id))
 
     def dispatch(self, peer, request):
         kind = request["type"]
@@ -81,7 +97,8 @@ class Server:
                 raise RequestError("DUPLICATE_USER")
             peer.session = Session(uid, name, uuid4().hex)
             self.users[uid] = peer
-            return {"user_id": uid, "name": name}
+            return {"success": True, "session_id": peer.session.session_id,
+                    "user_id": uid, "name": name}
         if not peer.session or token != peer.session.session_id:
             raise RequestError("INVALID_SESSION")
         if kind == "LOGOUT_REQUEST":
@@ -93,24 +110,25 @@ class Server:
         raise RequestError("UNKNOWN_REQUEST")
 
     async def read(self, peer):
-        loop = asyncio.get_running_loop()
-        while True:
-            request = await read_message(loop, peer.sock)
-            rid = request.get("request_id") if isinstance(request, dict) else None
+        async for request in messages(peer.sock):
+            rid = request.get("request_id")
+            if not valid_text(rid) or len(rid) > 64:
+                rid = None
             try:
-                if not (valid_text(rid) and type(request.get("version")) is int
-                        and request["version"] == 1 and valid_text(request.get("type"))
-                        and isinstance(request.get("payload"), dict)):
+                kind, _, _ = protocol.validate_envelope(request)
+                if not rid or not kind.endswith("_REQUEST") or request["event_id"] is not None:
                     raise RequestError("INVALID_REQUEST")
                 payload = self.dispatch(peer, request)
-                kind = request["type"].removesuffix("_REQUEST") + "_RESPONSE"
-            except RequestError as error:
-                kind, payload = "ERROR_RESPONSE", {"code": str(error)}
-            if not peer.send(dict(version=1, type=kind, request_id=rid if valid_text(rid) else None,
-                                  session_id=peer.session.session_id if peer.session else None,
-                                  payload=payload)):
+                response = protocol.build_response(kind.removesuffix("_REQUEST") + "_RESPONSE",
+                                                   payload, rid, peer.session.session_id)
+            except (RequestError, protocol.EnvelopeError) as error:
+                code = str(error) if isinstance(error, RequestError) else "INVALID_REQUEST"
+                detail = code.replace("_", " ").capitalize() if isinstance(error, RequestError) else str(error)
+                response = protocol.build_error(code, detail, rid,
+                                                peer.session.session_id if peer.session else None)
+            if not peer.send(response):
                 return
-            if kind == "LOGOUT_RESPONSE":
+            if response["type"] == "LOGOUT_RESPONSE":
                 self.detach(peer)
                 await peer.out.join()
                 return
@@ -164,4 +182,3 @@ class Server:
                     task.cancel()
                 await asyncio.gather(*self.tasks, return_exceptions=True)
                 self.rooms.close()
-
