@@ -1,0 +1,71 @@
+# stub peer bound on 127.0.0.1:36075 (started by the capture script)
+$ python3 client.py --server 127.0.0.1 --port 36075 --id m1_demo --name 'Member1 Demo'
+Commands
+  /quizzes            list the quiz catalogue
+  /rooms              list joinable rooms
+  /create <quiz_id>   create a room and become its host
+  /join <room_code>   join an existing room
+  /players            show participants and readiness
+  /ready              mark yourself ready
+  /notready           mark yourself not ready
+  /start              host starts the quiz
+  /answer <A|B|C|D>   answer the open question
+  /score              show the current leaderboard
+  /leave              leave the current room
+  /status             show your user id, room and whether a question is open
+  /quit               log out and close the connection
+  /help               show this list
+
+While a question is open you may also answer with a bare letter: A, B, C or D.
+> [LOGIN] connected as Member1 Demo (user_id=m1_demo)
+Type /help for the command list.
+Commands
+  /quizzes            list the quiz catalogue
+  /rooms              list joinable rooms
+  /create <quiz_id>   create a room and become its host
+  /join <room_code>   join an existing room
+  /players            show participants and readiness
+  /ready              mark yourself ready
+  /notready           mark yourself not ready
+  /start              host starts the quiz
+  /answer <A|B|C|D>   answer the open question
+  /score              show the current leaderboard
+  /leave              leave the current room
+  /status             show your user id, room and whether a question is open
+  /quit               log out and close the connection
+  /help               show this list
+
+While a question is open you may also answer with a bare letter: A, B, C or D.
+> > [QUIZZES] 2 available
+  1. stub-a  |  Stub Quiz A  (5 questions)
+     Canned catalogue entry used by the reference peer.
+  2. stub-b  |  Stub Quiz B  (3 questions)
+     Second canned entry, three questions.
+> [ROOMS] no joinable rooms right now
+> [ROOM] created DEMO for quiz stub-a
+[PLAYERS] 2 in room (state LOBBY)
+  - Stub Host (user_id=stub-host) [host, not ready]
+  - Stub Peer (user_id=stub-peer) [ready]
+> [PLAYERS] 2 in room (state LOBBY)
+  - Stub Host (user_id=stub-host) [host, not ready]
+  - Stub Peer (user_id=stub-peer) [ready]
+> [READY] you are now ready
+> [SCORE] room DEMO (state LOBBY)
+  1. Stub Peer (user_id=stub-peer) - 120 points, 2 correct
+  2. Stub Host (user_id=stub-host) - 60 points, 1 correct
+> [ROOM] left DEMO
+[STATUS] user_id=m1_demo room=None question_open=False
+> [LOGOUT] session closed
+
+[client exit code: 0]
+
+# stub trace (requests the client actually put on the wire)
+STUB request type=LOGIN_REQUEST request_id=req-0001
+STUB request type=LIST_QUIZZES_REQUEST request_id=req-0002
+STUB request type=LIST_ROOMS_REQUEST request_id=req-0003
+STUB request type=CREATE_ROOM_REQUEST request_id=req-0004
+STUB request type=PLAYER_LIST_REQUEST request_id=req-0005
+STUB request type=READY_REQUEST request_id=req-0006
+STUB request type=LEADERBOARD_REQUEST request_id=req-0007
+STUB request type=LEAVE_ROOM_REQUEST request_id=req-0008
+STUB request type=LOGOUT_REQUEST request_id=req-0009

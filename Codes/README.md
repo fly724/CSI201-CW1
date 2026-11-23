@@ -110,3 +110,13 @@ docker compose exec -T python python3 -m unittest discover -s tests -p 'test_*.p
 ## 源码分工
 
 `common/` 放双方共用的协议代码；`quiz_server/` 放题库校验、会话、房间与竞赛逻辑；`quiz_client/` 放用户输入、网络交互与事件显示。根目录的两个脚本只承担启动入口职责。测试计划见 [tests/README.md](tests/README.md)。
+
+## Member 1：协议与客户端（已实现）
+
+`common/protocol.py` 提供分帧、信封校验与消息构造；`quiz_client/client.py` 为客户端实现，`client.py` 已接入，接口保持本节列出的 `--server --port --id --name`。单元测试在 `tests/unit/`（22 个协议测试 + 19 个客户端测试），在 `Codes/` 下执行：
+
+```bash
+python3 -m unittest discover -s tests -p 'test_*.py'
+```
+
+参考对端 `tests/stub_server.py` 只用于单独验证客户端，不属于被评估的服务器。协议设计见 `Documentation/Member1_Protocol_and_Client.pdf`，运行记录见 `Documentation/evidence/member1/`。`quiz_server/`、题库校验与计分仍待实现。
