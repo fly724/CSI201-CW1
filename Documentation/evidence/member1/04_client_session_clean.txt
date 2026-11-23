@@ -1,0 +1,42 @@
+# session against the reference peer on 127.0.0.1:36309
+Commands
+  /quizzes            list the quiz catalogue
+  /rooms              list joinable rooms
+  /create <quiz_id>   create a room and become its host
+  /join <room_code>   join an existing room
+  /players            show participants and readiness
+  /ready              mark yourself ready
+  /notready           mark yourself not ready
+  /start              host starts the quiz
+  /answer <A|B|C|D>   answer the open question
+  /score              show the current leaderboard
+  /leave              leave the current room
+  /status             show your user id, room and whether a question is open
+  /quit               log out and close the connection
+  /help               show this list
+
+While a question is open you may also answer with a bare letter: A, B, C or D.
+> [LOGIN] connected as Member1 Demo (user_id=m1_demo)
+Type /help for the command list.
+> [QUIZZES] 2 available
+  1. stub-a  |  Stub Quiz A  (5 questions)
+     Canned catalogue entry used by the reference peer.
+  2. stub-b  |  Stub Quiz B  (3 questions)
+     Second canned entry, three questions.
+> [ROOMS] no joinable rooms right now
+> [ROOM] created DEMO for quiz stub-a
+[PLAYERS] 2 in room (state LOBBY)
+  - Stub Host (user_id=stub-host) [host, not ready]
+  - Stub Peer (user_id=stub-peer) [ready]
+> [PLAYERS] 2 in room (state LOBBY)
+  - Stub Host (user_id=stub-host) [host, not ready]
+  - Stub Peer (user_id=stub-peer) [ready]
+> [READY] you are now ready
+> [SCORE] room DEMO (state LOBBY)
+  1. Stub Peer (user_id=stub-peer) - 120 points, 2 correct
+  2. Stub Host (user_id=stub-host) - 60 points, 1 correct
+> [ROOM] left DEMO
+[STATUS] user_id=m1_demo room=None question_open=False
+> [LOGOUT] session closed
+
+[client exit code: 0]
