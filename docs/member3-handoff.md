@@ -1,10 +1,10 @@
-# Member 3 交接 · Rooms, quiz flow and scoring
+# Member 3 交接 · 房间、比赛流程与计分
 
 M3 业务实现在 `Codes/quiz_server/rooms.py`，接入 M2 的 `Server` 和 M1 的真实 CLI。分支 `codex/member3-room-quiz` 基于 M2 提交 `9a84b7b626c41560b78f56dc15b7aa1320a8e6f2`；M2 PR #1 尚未合并时，这个分支也会包含 M2 改动。合并顺序应为 M2 → M3，再由 M4、M5 继续联合验收。
 
-## 已实现的业务与团队规则
+## 当前业务规则
 
-以下容量、开赛条件、离房和同分策略是本实现的团队规则，不是任务书指定的唯一方案。
+以下是当前实现采用的规则。容量、开赛条件、离房和同分策略仍需小组确认；如需调整，应同步更新代码、README 和最终报告。
 
 - 每个会话同时只在一个房间；服务器生成 4 位房间码，加入时忽略大小写。房间最多 12 人。
 - 只有 `LOBBY` 房间出现在可加入列表中。列表包含题库名称、房主、人数和玩家显示名，不含题干、选项、答案或会话 token。
@@ -64,7 +64,7 @@ M2 在 `handle()` 返回后才排入请求响应。M1 收到 `ANSWER_RESPONSE` �
 | `Room.deadline` | `loop.time() + time_limit`，使用单调时钟；服务器处理答案时 `now >= deadline` 即拒绝，不以客户端发送时间判断 |
 | `Room.timer` | 当前 `call_at` 或提前关题的 `call_soon` handle；关题、销毁、停服均取消 |
 
-回调同时核对房间、场次和题目，防止旧计时器误关下一题或重赛的同一道题。M4 可从这些接口继续做边界与调度审查；修改时需保留答题确认与换题顺序。外部线程产生的动作先用 `loop.call_soon_threadsafe()` 回到服务器事件循环。
+回调同时核对房间、场次和题目，防止旧计时器误关下一题或重赛的同一道题。若计时回调略早于截止时间触发，会按原截止时间重新排期。M4 修改调度时需保留答题确认与换题顺序；外部线程产生的动作先用 `loop.call_soon_threadsafe()` 回到服务器事件循环。
 
 ## Docker 验证与复现
 
@@ -77,11 +77,11 @@ docker compose build python
 docker compose run --rm -T --entrypoint python python -B -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-本次 **81 项全部通过**：原有 M1 的 41 项、M2 的 9 项、新增 M3 的 26 项业务单元测试与 5 项真实网络/CLI 集成测试。全套运行耗时 36.495 秒；调试模式输出过调度耗时提示，结束时原有套件输出一个未关闭文件的 `ResourceWarning`，未导致测试失败。
+计时边界修复后，**83 项全部通过**：M1 的 41 项、M2 的 9 项、M3 的 28 项业务单元测试与 5 项真实网络/CLI 集成测试，全套耗时 38.510 秒。新增两项回归测试覆盖提前触发后仍按时关题，以及提前触发后全员答完不会误关下一题。运行中仍有调度耗时提示，结束时输出一个未关闭文件的 `ResourceWarning`，未导致测试失败。
 
 | 新增用例 | 真实检查范围 |
 |---|---|
-| `tests/unit/test_rooms.py`，26 项 | 大厅与权限、容量、题序、答案保密、一次答题、截止边界、计分、并列、重赛、旧回调、掉线和清理；截止边界使用可控时钟 |
+| `tests/unit/test_rooms.py`，28 项 | 大厅与权限、容量、题序、答案保密、一次答题、截止边界、提前计时回调、计分、并列、重赛、旧回调、掉线和清理；截止边界使用可控时钟 |
 | `test_ten_clients_complete_two_isolated_quizzes` | 10 个真实 TCP 连接，两个房间各 5 人，均完成 5 道题；逐连接核对事件归属和最终成绩 |
 | `test_real_timeout_does_not_block_another_room` | 真实 5 秒超时、未答计 0、旧题答案被拒绝，另一房间可独立答完整场 |
 | `test_invalid_answers_host_disconnect_and_bad_peer_are_isolated` | 非法/重复答案、未关题分数保密、房主断开后继续、非法帧和跨房间题号隔离 |
@@ -93,7 +93,3 @@ docker compose run --rm -T --entrypoint python python -B -m unittest discover -s
 ## 双客户端手动流程
 
 按 [Codes/README](../Codes/README.md) 启动服务器及两个客户端，使用默认 `questions.json`。Alice 执行 `/create network-basics`，Bob 使用返回的房间码 `/join <room_code>`。两人均 `/ready` 后 Alice `/start`，分别答题，检查题目结果、累计分数和最终排行榜。通过 `/players`、`/score`、`/leave`、`/quit` 检查查看与退出行为。第二房间可选 `tcp-python`，不能收到第一房间的题目或结果。
-
-## Report draft — room ownership and quiz progression
-
-The room service runs on the network server's event loop and uses authenticated session generations as membership keys. Each room owns its participant set, readiness flags, current question, answers, deadline and scores. Only a host with at least two ready players can start a quiz. Questions follow the validated bank's array order, and public question messages omit the correct answer. The server records at most one valid answer per active participant before its monotonic deadline. Scoring is deferred until the question closes, so score queries cannot reveal correctness while other participants are still answering. A question closes when all remaining participants have answered or its deadline expires, then the server publishes the result and advances automatically. Timer callbacks check the room, quiz run and question identity to avoid stale transitions. The final leaderboard uses descending scores and shared ranks for ties. Disconnect handling removes the departing participant and promotes a remaining host during play without suspending other rooms.

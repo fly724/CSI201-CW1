@@ -1,4 +1,4 @@
-"""Room membership, quiz progression and scoring on M2's event loop."""
+"""Room membership, quiz progression and scoring on the server event loop."""
 import asyncio
 from dataclasses import dataclass, field
 import secrets
@@ -185,7 +185,7 @@ class RoomService:
         return {"room_code": room.code, "total_questions": len(room.quiz["questions"])}
 
     def open_question(self, room_code, index):
-        """M3 transition / M4 timing seam; called only on the server event loop."""
+        """Publish a question and schedule its deadline on the server event loop."""
         room = self.rooms[room_code]
         question = room.quiz["questions"][index]
         room.question_index = index
@@ -228,8 +228,8 @@ class RoomService:
     def _close_if_all_answered(self, room):
         if room.state == "QUESTION_OPEN" and len(room.answers) == len(room.players):
             room.timer.cancel()
-            # M2 enqueues ANSWER_RESPONSE after handle() returns. Queue the next
-            # transition afterwards so M1 cannot clear the newly opened question.
+            # Wait for the network layer to queue ANSWER_RESPONSE first;
+            # otherwise the client clears the newly opened question.
             room.timer = asyncio.get_running_loop().call_soon(
                 self.close_question, room.code, room.run_id,
                 room.quiz["questions"][room.question_index]["question_id"], "all_answered")
@@ -240,8 +240,14 @@ class RoomService:
         if (room is None or room.state != "QUESTION_OPEN" or room.run_id != run_id
                 or room.quiz["questions"][room.question_index]["question_id"] != question_id):
             return False
-        if reason == "timeout" and asyncio.get_running_loop().time() < room.deadline:
-            return False
+        if reason == "timeout":
+            loop = asyncio.get_running_loop()
+            if loop.time() < room.deadline:
+                # A timer may fire just before its deadline; keep the timeout live.
+                room.timer.cancel()
+                room.timer = loop.call_at(room.deadline, self.close_question,
+                                          room_code, run_id, question_id)
+                return False
         room.state = "QUESTION_CLOSED"
         room.timer.cancel()
         room.timer = None

@@ -1,5 +1,7 @@
 # Member 2 交接 · Server networking and sessions
 
+本文记录 M2 的网络与会话接口。M3 已接入 `RoomService`，当前房间规则、事件字段和计时接口见 [M3 交接](member3-handoff.md)。
+
 ## 合并和启动
 
 本分支在 M2 提交 eb7d4cf 上合入 main 的 a706f61。登录、查询题库和注销已与 M1 的真实 CLI 联调。房间请求接入下文的 RoomService。
@@ -34,13 +36,13 @@ python3 -m unittest discover -s tests/integration -p test_member2.py -v
 | 答题 | ANSWER_REQUEST | question_id、answer |
 | 离房、退出 | LEAVE_ROOM_REQUEST / LOGOUT_REQUEST | {}；注销响应发送后关闭连接 |
 
-业务 payload 为 M3 对接建议，字段合法性由 M3 检查。正常响应将 _REQUEST 换为 _RESPONSE。错误统一为 ERROR_RESPONSE，payload.code 取 INVALID_REQUEST、INVALID_SESSION、INVALID_IDENTITY、DUPLICATE_USER、UNKNOWN_REQUEST 或业务错误码。非法帧长度、无效 UTF-8/JSON 或帧中途 EOF 会关闭该连接。结构错误但仍是合法 JSON 时返回 INVALID_REQUEST；不可用的 request_id 返回 null。
+业务 payload 由 M3 房间服务检查，当前字段见 M3 交接。正常响应将 _REQUEST 换为 _RESPONSE。错误统一为 ERROR_RESPONSE，payload.code 取 INVALID_REQUEST、INVALID_SESSION、INVALID_IDENTITY、DUPLICATE_USER、UNKNOWN_REQUEST 或业务错误码。非法帧长度、无效 UTF-8/JSON 或帧中途 EOF 会关闭该连接。结构错误但仍是合法 JSON 时返回 INVALID_REQUEST；不可用的 request_id 返回 null。
 
 ## M3 · 房间与比赛
 
-实现 quiz_server/rooms.py 中 RoomService 的三个方法。构造器接收通过校验的完整 bank 以及 emit。handle(session, kind, payload) 同步返回可公开的 dict，失败抛 RequestError("业务错误码")。已登录的真实身份取自不可变 Session(user_id, name, session_id)，业务请求内自报身份不能用来授权。M3 保存房间成员的 Session，disconnect(session) 负责离房、房主处理和通知余下成员；close() 释放所有房间资源。
+quiz_server/rooms.py 中的 RoomService 已实现房间、比赛流程和计分。构造器接收通过校验的完整 bank 以及 emit。handle(session, kind, payload) 同步返回可公开的 dict，失败抛 RequestError("业务错误码")。已登录的真实身份取自不可变 Session(user_id, name, session_id)，业务请求内自报身份不能用来授权。M3 保存房间成员的 Session，disconnect(session) 负责离房、房主处理和通知余下成员；close() 释放所有房间资源。
 
-广播时对目标房间的成员快照逐个调用 self.emit(member, "PLAYER_STATUS_EVENT", public_payload)。返回 False 表示会话已失效或队列已满。事件含 version、type、event_id、session_id、payload；过期会话不会投递给同 ID 的新连接。题目事件仅构造允许公开的字段，关闭前省略 answer。当前适配器返回 ROOM_SERVICE_UNAVAILABLE，故联调时可区分业务尚未接入与协议错误。test_member2.py 的 RoomProbe 给出了可运行的最小对接例子。
+广播时对目标房间的成员快照逐个调用 self.emit(member, "PLAYER_STATUS_EVENT", public_payload)。返回 False 表示会话已失效或队列已满。事件含 version、type、event_id、session_id、payload；过期会话不会投递给同 ID 的新连接。题目事件仅构造允许公开的字段，关闭前省略 answer。test_member2.py 的 RoomProbe 单独验证网络对接；真实房间流程由 test_member3.py 覆盖，运行规则见 M3 交接。
 
 ## M4 · 同步与计时
 

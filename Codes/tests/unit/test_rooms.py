@@ -212,6 +212,40 @@ class RoomTests(unittest.TestCase):
         result = self.latest("QUESTION_RESULT_EVENT")
         self.assertTrue(all(row["points_awarded"] == 0 for row in result["results"]))
 
+    def fire_timeout_early(self, code):
+        timer = self.service.rooms[code].timer
+        self.clock.now = timer.when - 1e-9
+        timer.cancel()  # Model a one-shot callback already consumed by the scheduler.
+        timer.callback(*timer.args)
+        return timer.when
+
+    def test_early_timeout_still_closes_at_deadline(self):
+        code = self.start()
+        deadline = self.fire_timeout_early(code)
+        self.assertEqual(self.latest("QUESTION_EVENT")["question_id"], "Q1-1")
+        self.assertFalse(any(kind == "QUESTION_RESULT_EVENT" for _, kind, _ in self.events))
+        self.clock.now = deadline
+        self.clock.run_due()
+        results = [payload for sid, kind, payload in self.events
+                   if sid == self.alice.session_id and kind == "QUESTION_RESULT_EVENT"]
+        self.assertEqual(len(results), 1, "The question must close once at its deadline")
+        result = results[0]
+        self.assertEqual(result["question_id"], "Q1-1")
+        self.assertEqual(result["reason"], "timeout")
+        self.assertTrue(all(row["points_awarded"] == 0 for row in result["results"]))
+        self.assertEqual(self.latest("QUESTION_EVENT")["question_id"], "Q1-2")
+
+    def test_early_timeout_followed_by_answers_does_not_close_next_question(self):
+        code = self.start()
+        deadline = self.fire_timeout_early(code)
+        self.finish_question()
+        before = len(self.events)
+        self.clock.now = deadline
+        self.clock.run_due()
+        self.assertEqual(len(self.events), before)
+        self.assertEqual(self.latest("QUESTION_EVENT")["question_id"], "Q1-2")
+        self.assertEqual(self.call(self.alice, "LEADERBOARD")["leaderboard"][0]["score"], 10)
+
     def test_answer_just_before_deadline_is_accepted(self):
         self.start()
         self.clock.now += 4.999

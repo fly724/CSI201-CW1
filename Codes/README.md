@@ -74,7 +74,7 @@ docker compose exec python python3 client.py --server 127.0.0.1 --port 5000 --id
 docker compose exec -T python python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-也可不启动常驻容器，直接在仓库根目录执行 `docker compose run --rm -T --entrypoint python python -B -m unittest discover -s tests -p 'test_*.py' -v`。2026-11-24 在课程 Dockerfile 构建的 Python 3.12.16 容器中，81 项测试通过，包含 10 客户端、双房间及两个真实 CLI 的完整比赛。覆盖与限制见 [tests/README.md](tests/README.md) 和 M3 交接。
+也可不启动常驻容器，直接在仓库根目录执行 `docker compose run --rm -T --entrypoint python python -B -m unittest discover -s tests -p 'test_*.py' -v`。2026-11-24 在课程 Dockerfile 构建的 Python 3.12.16 容器中，83 项测试通过，包含 10 客户端、双房间及两个真实 CLI 的完整比赛。覆盖与限制见 [tests/README.md](tests/README.md) 和 M3 交接。
 
 ## CLI 命令
 
