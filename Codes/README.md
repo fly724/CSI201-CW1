@@ -1,6 +1,6 @@
 # 运行与操作说明
 
-**状态：M1 客户端、M2 网络会话和 M3 房间/比赛业务已接通。** 可进行建房、加入、准备、答题、计分与排行榜流程。M3 分支基于尚待合并的 M2 提交；详细规则及 M4 计时接口见 [M3 交接](../docs/member3-handoff.md)。
+**状态：M1 客户端、M2 网络会话和 M3 房间/比赛业务已接通。** 可进行建房、加入、准备、答题、计分与排行榜流程。M2 已通过 PR #1 合并到 `main`，M3 由 PR #2 审查。详细规则及 M4 计时接口见 [M3 交接](../docs/member3-handoff.md)。
 
 ## 开发环境
 
@@ -74,7 +74,7 @@ docker compose exec python python3 client.py --server 127.0.0.1 --port 5000 --id
 docker compose exec -T python python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-也可不启动常驻容器，直接在仓库根目录执行 `docker compose run --rm -T --entrypoint python python -B -m unittest discover -s tests -p 'test_*.py' -v`。2026-11-24 在课程 Dockerfile 构建的 Python 3.12.16 容器中，83 项测试通过，包含 10 客户端、双房间及两个真实 CLI 的完整比赛。覆盖与限制见 [tests/README.md](tests/README.md) 和 M3 交接。
+也可在仓库根目录执行 `docker compose run --rm -T --entrypoint python python -B -m unittest discover -s tests -p 'test_*.py' -v`。2026-11-24 在课程 Dockerfile 构建的 Python 3.12.16 容器中，86 项测试通过，包含 10 客户端、双房间、两个真实 CLI 的完整比赛和重赛旧答案校验。覆盖与限制见 [tests/README.md](tests/README.md) 和 M3 交接。
 
 ## CLI 命令
 
@@ -108,7 +108,7 @@ docker compose exec -T python python3 -m unittest discover -s tests -p 'test_*.p
 - 活跃用户 ID 必须唯一，显示名可重复；重连取得新会话，不恢复旧房间和成绩。
 - 房间容量 12，至少 2 人且全部准备后由房主开赛。大厅房主离开关闭房间；比赛中或结束后由最早加入的剩余玩家接任。离房者从当前排行榜移除。
 - 只可加入大厅；结束后留场成员可重新准备并重赛，也可离开另建房间。正确答案只在关题后公布，成绩按分数降序，同分共享名次。
-- 开赛后按题库顺序自动推进；全部活跃玩家答完可提前关题。截止时间由服务器处理答案时的单调时钟决定。
+- 开赛后按题库顺序自动推进；全部活跃玩家答完可提前关题。服务器用场次编号和题目编号判断答案归属，并用单调时钟判断是否超时。
 - 网络层每连接发送队列为 64 帧，单次发送超时 5 秒；不记录开放题目的答案或敏感会话标识。
 - 客户端 `/quit` 注销，服务器 Ctrl+C 停服并清理连接及房间计时器。最终提交仍需团队复测、报告、贡献说明与全员演示。
 
@@ -118,7 +118,7 @@ docker compose exec -T python python3 -m unittest discover -s tests -p 'test_*.p
 
 ## Member 1：协议与客户端（已实现）
 
-`common/protocol.py` 提供分帧、信封校验与消息构造；`quiz_client/client.py` 为客户端实现，`client.py` 已接入，接口保持本节列出的 `--server --port --id --name`。单元测试在 `tests/unit/`（22 个协议测试 + 19 个客户端测试），在 `Codes/` 下执行：
+`common/protocol.py` 提供分帧、信封校验与消息构造；`quiz_client/client.py` 为客户端实现，`client.py` 已接入，接口保持本节列出的 `--server --port --id --name`。单元测试在 `tests/unit/`（22 个协议测试 + 21 个客户端测试），在 `Codes/` 下执行：
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'

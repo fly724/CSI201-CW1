@@ -1,6 +1,6 @@
 # Member 3 交接 · 房间、比赛流程与计分
 
-M3 业务在 `Codes/quiz_server/rooms.py`，接入 M2 的服务端和 M1 的命令行客户端。实现基于 M2 提交 `9a84b7b`。先合并 M2 的 PR #1，再合并 M3，随后由 M4、M5 联合验收。
+M3 业务在 `Codes/quiz_server/rooms.py`，接入 M2 的服务端和 M1 的命令行客户端。依赖的 M2 提交 `9a84b7b` 已由 PR #1 合入 `main`。M3 由 PR #2 审查，随后由 M4、M5 联合验收。
 
 ## 当前业务规则
 
@@ -10,7 +10,7 @@ M3 业务在 `Codes/quiz_server/rooms.py`，接入 M2 的服务端和 M1 的命�
 - 只有 `LOBBY` 房间出现在可加入列表中。列表包含题库名称、房主、人数和玩家显示名，不含题干、选项、答案或会话 token。
 - 至少 2 人、所有人 `/ready`、由房主 `/start` 才能开赛。大厅可 `/notready` 撤销准备，开赛后不能加入或修改准备状态。
 - 题目按题库数组顺序自动发布，使用每题 `time_limit` 和 `points`。所有仍在房间的玩家答完后提前关题，否则截止时自动关题。
-- 每个玩家每题只记录第一个合法且按时的 A/B/C/D，接受小写。非法选项不消耗答题机会。重复、迟到、其他题目的答案返回错误，不重复计分。
+- 每个玩家每场每题只记录第一个合法且按时的 A/B/C/D，接受小写。非法选项不消耗答题机会。重复、迟到、其他场次或题目的答案返回错误，不重复计分。
 - 关题时统一计分并公布正确答案：答对加该题 `points`，答错或未答加 0。开放期间查询分数只看到之前已关闭题目的累计分，避免利用即时加分探测答案。
 - 最后一道题关闭后公布排行榜和胜者。按分数降序，分数相同共享名次（例如 1、1、3），同分显示顺序按 `user_id`；最高分并列时列出全部胜者。
 - 大厅房主离开会关闭房间；比赛中或结束后房主离开，由仍在场、最早加入的玩家接任。普通玩家离开不关闭房间。离开者及其当前答案、成绩从房间中移除。
@@ -22,7 +22,7 @@ M3 业务在 `Codes/quiz_server/rooms.py`，接入 M2 的服务端和 M1 的命�
 
 保留 M2 约定的 `RoomService(bank, emit)`、`handle(session, kind, payload)`、`disconnect(session)` 和 `close()`。业务失败抛 `RequestError("错误码")`，由 M2 生成 `ERROR_RESPONSE`。成员身份始终取 M2 验证过的 `Session`；忽略答题 payload 自报的 `user_id` 或 `room_code`，不能跨房间代答。
 
-请求字段沿用 [M2 交接](member2-handoff.md)；无需修改 M1 或 M2 源码。
+请求字段见 [M2 交接](member2-handoff.md)。每次开赛分配正整数 `run_id`。M1 从 `QUESTION_EVENT` 取得 `run_id` 和 `question_id`，发送 `ANSWER_REQUEST` 时和 `answer` 一起回传。缺少 `run_id` 或类型、取值不合法时返回 `INVALID_REQUEST`，不属于当前场次时返回 `QUESTION_CLOSED`。M1 和 M3 应配对使用该协议，M2 原样转交 payload。
 
 | 请求 | 成功响应的 payload |
 |---|---|
@@ -31,7 +31,7 @@ M3 业务在 `Codes/quiz_server/rooms.py`，接入 M2 的服务端和 M1 的命�
 | `PLAYER_LIST_REQUEST` | 当前 room 快照；成员含 `user_id/name/ready/is_host/score` |
 | `READY_REQUEST` | `ready` 布尔值 |
 | `START_QUIZ_REQUEST` | `room_code/total_questions` |
-| `ANSWER_REQUEST` | `accepted/question_id/number`，不提前返回是否正确 |
+| `ANSWER_REQUEST` | `accepted/question_id/run_id/number`，不提前返回是否正确 |
 | `LEADERBOARD_REQUEST` | `room_code/state/leaderboard` |
 | `LEAVE_ROOM_REQUEST` | `room_code` |
 
@@ -39,8 +39,8 @@ M3 业务在 `Codes/quiz_server/rooms.py`，接入 M2 的服务端和 M1 的命�
 |---|---|
 | `PLAYER_STATUS_EVENT` | 当前 room 快照 |
 | `QUIZ_STARTED_EVENT` | `room_code/quiz_id/title/total_questions` |
-| `QUESTION_EVENT` | `room_code/question_id/number/total_questions/text/options/time_limit/points`；没有 `answer` |
-| `QUESTION_RESULT_EVENT` | `room_code/question_id/number/total_questions/correct_answer/points/results/leaderboard/reason` |
+| `QUESTION_EVENT` | `room_code/question_id/run_id/number/total_questions/text/options/time_limit/points`；没有 `answer` |
+| `QUESTION_RESULT_EVENT` | `room_code/question_id/run_id/number/total_questions/correct_answer/points/results/leaderboard/reason` |
 | `QUIZ_FINISHED_EVENT` | `room_code/quiz_id/leaderboard/winner_user_ids/winner_score/tied` |
 | `HOST_CHANGED_EVENT` | `room_code/host_user_id/host_name` |
 | `ROOM_CLOSED_EVENT` | `room_code/reason` |
@@ -49,7 +49,7 @@ M3 业务在 `Codes/quiz_server/rooms.py`，接入 M2 的服务端和 M1 的命�
 
 ### 回包与推送顺序
 
-M2 在 `handle()` 返回后才排入请求响应。M1 收到 `ANSWER_RESPONSE` 会清除本地当前题目，所以最后一个答案不能在 `handle()` 内同步发布下一题。当前通过 `loop.call_soon()` 延后“全员答完”的关题动作，使同一连接上依次收到答题确认、该题结果、下一题。其他操作的成员事件仍可能先于对应响应到达，客户端不能假定所有响应都先于事件。
+M2 在 `handle()` 返回后才排入请求响应。`loop.call_soon()` 延后“全员答完”的关题动作，使同一连接上依次收到答题确认、该题结果、下一题。M1 收到答题确认或题目结果时，只有 `run_id` 与 `question_id` 都匹配才清除当前题目。其他操作的成员事件仍可能先于对应响应到达。
 
 ## M4 计时接入点
 
@@ -58,9 +58,9 @@ M2 在 `handle()` 返回后才排入请求响应。M1 收到 `ANSWER_RESPONSE` �
 | 接口或字段 | 当前行为与接入约束 |
 |---|---|
 | `open_question(room_code, index)` | 发布指定数组下标的题目；由开赛和上一题关闭流程调用 |
-| `submit_answer(session, payload)` | 先校验身份、当前题、截止边界与重复情况，再记录一次答案 |
+| `submit_answer(session, payload)` | 先校验身份、场次、当前题、截止边界与重复情况，再记录一次答案 |
 | `close_question(room_code, run_id, question_id, reason="timeout")` | 取消计时器、结算、广播结果并自动推进；失效回调返回 `False` |
-| `Room.run_id` | 每次开赛分配服务内递增编号，重赛也更新；用于计时回调，不是 M1 当前请求字段 |
+| `Room.run_id` | 每次开赛分配服务内递增编号，重赛也更新；用于计时回调和答题归属校验 |
 | `Room.deadline` | `loop.time() + time_limit`，使用单调时钟；服务器处理答案时 `now >= deadline` 即拒绝，不以客户端发送时间判断 |
 | `Room.timer` | 当前 `call_at` 或提前关题的 `call_soon` handle；关题、销毁、停服均取消 |
 
@@ -77,13 +77,14 @@ docker compose build python
 docker compose run --rm -T --entrypoint python python -B -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-计时边界修复后，**83 项全部通过**：M1 的 41 项、M2 的 9 项、M3 的 28 项业务单元测试与 5 项真实网络/CLI 集成测试，全套耗时 38.510 秒。新增两项回归测试覆盖提前触发后仍按时关题，以及提前触发后全员答完不会误关下一题。运行中仍有调度耗时提示，结束时输出一个未关闭文件的 `ResourceWarning`，未导致测试失败。
+重赛与 CLI 修复后，**86 项全部通过**。M1 的 43 项、M2 的 9 项、M3 的 28 项业务单元测试与 6 项真实网络/CLI 集成测试，全套耗时 30.717 秒。这次执行增加了 `-e PYTHONWARNINGS=always::ResourceWarning`，未再出现未关闭文件的警告。运行中仍有 asyncio 调度耗时提示。
 
 | 新增用例 | 真实检查范围 |
 |---|---|
 | `tests/unit/test_rooms.py`，28 项 | 大厅与权限、容量、题序、答案保密、一次答题、截止边界、提前计时回调、计分、并列、重赛、旧回调、掉线和清理；截止边界使用可控时钟 |
 | `test_ten_clients_complete_two_isolated_quizzes` | 10 个真实 TCP 连接，两个房间各 5 人，均完成 5 道题；逐连接核对事件归属和最终成绩 |
 | `test_real_timeout_does_not_block_another_room` | 真实 5 秒超时、未答计 0、旧题答案被拒绝，另一房间可独立答完整场 |
+| `test_previous_run_answer_does_not_count_in_rematch` | 通过 TCP 完成一场后重赛，题目编号相同，旧场次答案被拒绝，新答案正常接受并单独计分 |
 | `test_invalid_answers_host_disconnect_and_bad_peer_are_isolated` | 非法/重复答案、未关题分数保密、房主断开后继续、非法帧和跨房间题号隔离 |
 | `test_lobby_host_logout_closes_room_but_not_guest_session` | 房主注销关闭大厅、其他会话可另建房、原 ID 重登取得新 token |
 | `test_existing_m1_cli_can_answer_all_five_questions` | 真实 `server.py` 加两个 M1 `client.py` 子进程；建房、加入、准备、连续答题、最终胜者和注销 |

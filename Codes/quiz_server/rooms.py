@@ -197,7 +197,7 @@ class RoomService:
                                   room.code, room.run_id, question["question_id"])
         public = {key: question[key] for key in ("question_id", "text", "time_limit", "points")}
         public["options"] = dict(question["options"])
-        public.update(room_code=room.code, number=index + 1,
+        public.update(room_code=room.code, run_id=room.run_id, number=index + 1,
                       total_questions=len(room.quiz["questions"]))
         self._broadcast(room, "QUESTION_EVENT", public)
 
@@ -208,6 +208,11 @@ class RoomService:
             raise RequestError("QUESTION_CLOSED")
         question = room.quiz["questions"][room.question_index]
         qid = self._text(payload, "question_id")
+        run_id = payload.get("run_id")
+        if type(run_id) is not int or run_id < 1:
+            raise RequestError("INVALID_REQUEST")
+        if run_id != room.run_id:
+            raise RequestError("QUESTION_CLOSED")
         if qid != question["question_id"]:
             if any(q["question_id"] == qid for q in room.quiz["questions"][:room.question_index]):
                 raise RequestError("QUESTION_CLOSED")
@@ -223,13 +228,13 @@ class RoomService:
             raise RequestError("INVALID_ANSWER")
         room.answers[session.session_id] = answer.upper()
         self._close_if_all_answered(room)
-        return {"accepted": True, "question_id": qid, "number": room.question_index + 1}
+        return {"accepted": True, "question_id": qid, "run_id": run_id,
+                "number": room.question_index + 1}
 
     def _close_if_all_answered(self, room):
         if room.state == "QUESTION_OPEN" and len(room.answers) == len(room.players):
             room.timer.cancel()
-            # Wait for the network layer to queue ANSWER_RESPONSE first;
-            # otherwise the client clears the newly opened question.
+            # Let the network layer queue the answer receipt before the result and next question.
             room.timer = asyncio.get_running_loop().call_soon(
                 self.close_question, room.code, room.run_id,
                 room.quiz["questions"][room.question_index]["question_id"], "all_answered")
@@ -264,7 +269,7 @@ class RoomService:
                             "your_answer": answer, "correct": correct,
                             "points_awarded": awarded, "score": player.score})
         self._broadcast(room, "QUESTION_RESULT_EVENT", {
-            "room_code": room.code, "question_id": question_id,
+            "room_code": room.code, "question_id": question_id, "run_id": run_id,
             "number": room.question_index + 1, "total_questions": len(room.quiz["questions"]),
             "correct_answer": question["answer"], "points": question["points"],
             "results": results, "leaderboard": self._rank(room), "reason": reason,

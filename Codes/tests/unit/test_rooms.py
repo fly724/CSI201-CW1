@@ -94,8 +94,9 @@ class RoomTests(unittest.TestCase):
         return [p for sid, event, p in self.events if sid == target and event == kind][-1]
 
     def answer(self, player, answer="B", question_id=None):
-        qid = question_id or self.latest("QUESTION_EVENT", player)["question_id"]
-        return self.call(player, "ANSWER", question_id=qid, answer=answer)
+        question = self.latest("QUESTION_EVENT", player)
+        return self.call(player, "ANSWER", question_id=question_id or question["question_id"],
+                         run_id=question["run_id"], answer=answer)
 
     def finish_question(self, first="B", second="B"):
         self.answer(self.alice, first)
@@ -178,7 +179,7 @@ class RoomTests(unittest.TestCase):
     def test_score_is_not_exposed_before_question_closes(self):
         self.start()
         response = self.answer(self.alice)
-        self.assertEqual(set(response), {"accepted", "question_id", "number"})
+        self.assertEqual(set(response), {"accepted", "question_id", "run_id", "number"})
         self.assertEqual(self.call(self.alice, "LEADERBOARD")["leaderboard"][0]["score"], 0)
         self.assertEqual(self.call(self.bob, "PLAYER_LIST")["players"][0]["score"], 0)
         self.answer(self.bob, "A")
@@ -188,9 +189,12 @@ class RoomTests(unittest.TestCase):
 
     def test_duplicate_and_invalid_answers_do_not_add_points(self):
         self.start()
-        self.assert_error("INVALID_ANSWER", self.alice, "ANSWER", question_id="Q1-1", answer="Z")
+        run_id = self.latest("QUESTION_EVENT")["run_id"]
+        self.assert_error("INVALID_REQUEST", self.alice, "ANSWER", question_id="Q1-1", answer="B")
+        self.assert_error("INVALID_REQUEST", self.alice, "ANSWER", question_id="Q1-1", run_id=True, answer="B")
+        self.assert_error("INVALID_ANSWER", self.alice, "ANSWER", question_id="Q1-1", run_id=run_id, answer="Z")
         self.answer(self.alice, "b")
-        self.assert_error("DUPLICATE_ANSWER", self.alice, "ANSWER", question_id="Q1-1", answer="B")
+        self.assert_error("DUPLICATE_ANSWER", self.alice, "ANSWER", question_id="Q1-1", run_id=run_id, answer="B")
         self.answer(self.bob, "A")
         self.clock.run_due()
         self.assertEqual(self.latest("QUESTION_RESULT_EVENT")["leaderboard"][0]["score"], 10)
@@ -198,8 +202,10 @@ class RoomTests(unittest.TestCase):
     def test_wrong_question_and_spoofed_room_are_not_used(self):
         code = self.start()
         other = self.create(self.charlie, "quiz-2")
-        self.assert_error("INVALID_ANSWER", self.alice, "ANSWER", question_id="Q2-1", answer="B")
-        self.call(self.alice, "ANSWER", question_id="Q1-1", answer="B", room_code=other, user_id="charlie")
+        run_id = self.latest("QUESTION_EVENT")["run_id"]
+        self.assert_error("INVALID_ANSWER", self.alice, "ANSWER", question_id="Q2-1", run_id=run_id, answer="B")
+        self.call(self.alice, "ANSWER", question_id="Q1-1", run_id=run_id, answer="B",
+                  room_code=other, user_id="charlie")
         self.answer(self.bob)
         self.clock.run_due()
         self.assertEqual(self.latest("QUESTION_RESULT_EVENT")["room_code"], code)
@@ -207,8 +213,9 @@ class RoomTests(unittest.TestCase):
 
     def test_deadline_boundary_rejects_even_when_timer_has_not_run(self):
         self.start()
+        run_id = self.latest("QUESTION_EVENT")["run_id"]
         self.clock.now += 5
-        self.assert_error("QUESTION_CLOSED", self.alice, "ANSWER", question_id="Q1-1", answer="B")
+        self.assert_error("QUESTION_CLOSED", self.alice, "ANSWER", question_id="Q1-1", run_id=run_id, answer="B")
         result = self.latest("QUESTION_RESULT_EVENT")
         self.assertTrue(all(row["points_awarded"] == 0 for row in result["results"]))
 
@@ -256,10 +263,11 @@ class RoomTests(unittest.TestCase):
 
     def test_expiry_moves_to_next_question_and_rejects_old_answer(self):
         self.start()
+        run_id = self.latest("QUESTION_EVENT")["run_id"]
         self.clock.now += 5
         self.clock.run_due()
         self.assertEqual(self.latest("QUESTION_EVENT")["question_id"], "Q1-2")
-        self.assert_error("QUESTION_CLOSED", self.alice, "ANSWER", question_id="Q1-1", answer="B")
+        self.assert_error("QUESTION_CLOSED", self.alice, "ANSWER", question_id="Q1-1", run_id=run_id, answer="B")
 
     def test_all_answered_advances_after_handler_returns(self):
         self.start()

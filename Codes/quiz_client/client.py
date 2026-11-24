@@ -213,7 +213,7 @@ class QuizClient:
         self._print(f"[START] accepted: {payload.get('total_questions')} questions")
 
     def _on_answer_response(self, message_type: str, request_id: str | None, payload: dict[str, Any]) -> None:
-        self._open_question = None
+        self._clear_question(payload)
         self._print(f"[ANSWER] accepted for question {payload.get('question_id')} "
                     f"(question {payload.get('number')})")
 
@@ -258,14 +258,18 @@ class QuizClient:
         self._print(f"  {payload.get('text')}")
         options = payload.get("options") or {}
         letters = sorted(options)
-        for index in range(0, len(letters), 2):
-            pair = letters[index:index + 2]
-            line = "   ".join(f"  {key}) {options[key][:60]}" for key in pair)
-            self._print(line)
+        for key in letters:
+            self._print(f"  {key}) {options[key]}")
         self._print(f"  answer with /answer <{'|'.join(letters)}> within {payload.get('time_limit')}s")
 
+    def _clear_question(self, payload: dict[str, Any]) -> None:
+        question = self._open_question
+        if (question is not None and question.get("question_id") == payload.get("question_id")
+                and question.get("run_id") == payload.get("run_id")):
+            self._open_question = None
+
     def _on_question_result_event(self, message_type: str, request_id: str | None, payload: dict[str, Any]) -> None:
-        self._open_question = None
+        self._clear_question(payload)
         correct = payload.get("correct_answer")
         self._print(f"[RESULT {payload.get('number')}/{payload.get('total_questions')}] "
                     f"{payload.get('question_id')} correct answer: {correct}")
@@ -354,14 +358,15 @@ class QuizClient:
 
     def _handle_command(self, line: str) -> bool:
         """Handle one line of input.  Returns False when the client should exit."""
+        question = self._open_question
         if not line.startswith("/"):
             upper = line.upper()
-            if upper in ("A", "B", "C", "D") and self._open_question is not None:
-                self.request("ANSWER_REQUEST", {"question_id": self._open_question.get("question_id"), "answer": upper})
+            if upper in ("A", "B", "C", "D") and question is not None:
+                self._submit_answer(question, upper)
                 return True
-            if line.isdigit() and self._open_question is not None and 1 <= int(line) <= 4:
+            if line.isdigit() and question is not None and 1 <= int(line) <= 4:
                 letter = "ABCD"[int(line) - 1]
-                self.request("ANSWER_REQUEST", {"question_id": self._open_question.get("question_id"), "answer": letter})
+                self._submit_answer(question, letter)
                 return True
             self._print("[CLIENT] commands start with '/'. Type /help for the list.")
             return True
@@ -396,13 +401,10 @@ class QuizClient:
             answer = argument.strip().upper()
             if not answer:
                 self._print("[CLIENT] usage: /answer <A|B|C|D>")
-            elif self._open_question is None:
+            elif question is None:
                 self._print("[CLIENT] no question is open")
             else:
-                self.request("ANSWER_REQUEST", {
-                    "question_id": self._open_question.get("question_id"),
-                    "answer": answer,
-                })
+                self._submit_answer(question, answer)
         elif command == "/score":
             self.request("LEADERBOARD_REQUEST")
         elif command == "/leave":
@@ -416,3 +418,10 @@ class QuizClient:
         else:
             self._print(f"[CLIENT] unknown command {command!r}. Type /help for the list.")
         return True
+
+    def _submit_answer(self, question: dict[str, Any], answer: str) -> None:
+        self.request("ANSWER_REQUEST", {
+            "question_id": question.get("question_id"),
+            "run_id": question.get("run_id"),
+            "answer": answer,
+        })

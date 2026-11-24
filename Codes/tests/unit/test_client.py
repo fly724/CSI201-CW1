@@ -94,6 +94,7 @@ class RenderingTests(unittest.TestCase):
     def test_question_event_renders_options_and_tracks_state(self) -> None:
         payload = {
             "question_id": "q1",
+            "run_id": 1,
             "number": 1,
             "total_questions": 5,
             "text": "Which port does DNS use by default?",
@@ -109,11 +110,19 @@ class RenderingTests(unittest.TestCase):
         self.assertIn("/answer <A|B|C|D>", output)
         self.assertEqual(client._open_question, payload)
 
+    def test_question_event_shows_the_entire_option(self) -> None:
+        option = "x" * 195 + " end."
+        payload = {"question_id": "q1", "run_id": 1, "options": {"A": option, "B": "Short"}}
+        output = self.render(self.make_client(), build_event("QUESTION_EVENT", payload, "evt-long"))
+        self.assertIn(f"  A) {option}\n", output)
+        self.assertIn("  B) Short\n", output)
+
     def test_question_result_closes_the_open_question(self) -> None:
         client = self.make_client()
-        client._open_question = {"question_id": "q1"}
+        client._open_question = {"question_id": "q1", "run_id": 1}
         payload = {
             "question_id": "q1",
+            "run_id": 1,
             "number": 1,
             "total_questions": 5,
             "correct_answer": "A",
@@ -129,6 +138,17 @@ class RenderingTests(unittest.TestCase):
         self.assertIn("correct answer: A", output)
         self.assertIn("you answered A; +100 (total 100)", output)
         self.assertIn("1. Alice (user_id=alice) - 100 points, 1 correct", output)
+        self.assertIsNone(client._open_question)
+
+    def test_reply_to_a_previous_run_keeps_current_question_open(self) -> None:
+        client = self.make_client()
+        question = {"question_id": "q1", "run_id": 2}
+        client._open_question = question
+        previous = {"question_id": "q1", "run_id": 1}
+        self.render(client, build_response("ANSWER_RESPONSE", previous, "req-old"))
+        self.render(client, build_event("QUESTION_RESULT_EVENT", previous, "evt-old"))
+        self.assertIs(client._open_question, question)
+        self.render(client, build_response("ANSWER_RESPONSE", question, "req-current"))
         self.assertIsNone(client._open_question)
 
     def test_tie_is_reported_as_tie(self) -> None:
@@ -196,13 +216,15 @@ class CommandTests(unittest.TestCase):
         self.assertIn("[CLIENT] no question is open", output)
         self.assertEqual(self.sent, [])
 
-        self.client._open_question = {"question_id": "q7"}
+        self.client._open_question = {"question_id": "q7", "run_id": 7}
         self.run_command("/answer b")
         self.run_command("C")
         self.run_command("3")
         self.assertEqual([entry[0] for entry in self.sent], ["ANSWER_REQUEST"] * 3)
-        self.assertEqual(self.sent[0], ("ANSWER_REQUEST", {"question_id": "q7", "answer": "B"}))
-        self.assertEqual(self.sent[2], ("ANSWER_REQUEST", {"question_id": "q7", "answer": "C"}))
+        self.assertEqual(self.sent, [
+            ("ANSWER_REQUEST", {"question_id": "q7", "run_id": 7, "answer": answer})
+            for answer in ("B", "C", "C")
+        ])
 
     def test_non_command_text_is_rejected_politely(self) -> None:
         output = self.run_command("hello")
@@ -229,12 +251,12 @@ class StubServerTests(unittest.TestCase):
             bufsize=1,
             cwd=CODES_DIR,
         )
+        cls.reader = threading.Thread(target=cls._drain, name="stub-log-drain", daemon=True)
+        cls.addClassCleanup(cls._stop_stub)
         first = cls.process.stdout.readline().strip()
         if not first.startswith("STUB_READY"):
-            cls.process.kill()
             raise RuntimeError(f"stub server did not start: {first!r}")
         cls.port = int(first.split()[1])
-        cls.reader = threading.Thread(target=cls._drain, name="stub-log-drain", daemon=True)
         cls.reader.start()
 
     @classmethod
@@ -243,13 +265,17 @@ class StubServerTests(unittest.TestCase):
             cls.lines.append(line.strip())
 
     @classmethod
-    def tearDownClass(cls) -> None:
-        cls.process.terminate()
+    def _stop_stub(cls) -> None:
         try:
+            cls.process.terminate()
             cls.process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            cls.process.kill()
+            cls.process.wait()
         finally:
-            if cls.process.poll() is None:
-                cls.process.kill()
+            if cls.reader.ident is not None:
+                cls.reader.join()
+            cls.process.stdout.close()
 
     def saw_request(self, message_type: str, timeout: float = 3.0) -> bool:
         deadline = time.time() + timeout

@@ -33,7 +33,7 @@ python3 -m unittest discover -s tests/integration -p test_member2.py -v
 | 查看房间、玩家、排名 | LIST_ROOMS_REQUEST / PLAYER_LIST_REQUEST / LEADERBOARD_REQUEST | {} |
 | 创建、加入 | CREATE_ROOM_REQUEST / JOIN_ROOM_REQUEST | 分别传 quiz_id、room_code |
 | 准备、开始 | READY_REQUEST / START_QUIZ_REQUEST | 分别传 ready 布尔值、{} |
-| 答题 | ANSWER_REQUEST | question_id、answer |
+| 答题 | ANSWER_REQUEST | question_id、run_id（取自 QUESTION_EVENT）、answer |
 | 离房、退出 | LEAVE_ROOM_REQUEST / LOGOUT_REQUEST | {}；注销响应发送后关闭连接 |
 
 业务 payload 由 M3 房间服务检查，当前字段见 M3 交接。正常响应将 _REQUEST 换为 _RESPONSE。错误统一为 ERROR_RESPONSE，payload.code 取 INVALID_REQUEST、INVALID_SESSION、INVALID_IDENTITY、DUPLICATE_USER、UNKNOWN_REQUEST 或业务错误码。非法帧长度、无效 UTF-8/JSON 或帧中途 EOF 会关闭该连接。结构错误但仍是合法 JSON 时返回 INVALID_REQUEST；不可用的 request_id 返回 null。

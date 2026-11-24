@@ -47,6 +47,10 @@ class WireClient:
                 return message
             self.pending.append(message)
 
+    async def answer(self, question, letter, **fields):
+        return await self.call("ANSWER", question_id=question["question_id"],
+                               run_id=question["run_id"], answer=letter, **fields)
+
     async def event(self, kind):
         for index, message in enumerate(self.pending):
             if message["type"] == kind:
@@ -112,8 +116,7 @@ class Gameplay(unittest.IsolatedAsyncioTestCase):
                     self.assertEqual(question["room_code"], codes[room_index - 1])
                     self.assertNotIn("answer", question)
                 replies = await asyncio.gather(*(
-                    c.call("ANSWER", question_id=questions[i]["question_id"],
-                           answer="B" if i == 0 else "A")
+                    c.answer(questions[i], "B" if i == 0 else "A")
                     for i, c in enumerate(group)))
                 self.assertTrue(all(r["type"] == "ANSWER_RESPONSE" for r in replies))
                 results = await asyncio.gather(*(c.event("QUESTION_RESULT_EVENT") for c in group))
@@ -136,11 +139,11 @@ class Gameplay(unittest.IsolatedAsyncioTestCase):
         host, guest, other_host, other_guest = [await self.connect(uid) for uid in ("a", "b", "c", "d")]
         first = await self.room([host, guest], "network_1")
         other = await self.room([other_host, other_guest], "network_2")
-        qid = (await host.event("QUESTION_EVENT"))["question_id"]
-        invalid = await host.call("ANSWER", question_id=qid, answer="E")
+        question = await host.event("QUESTION_EVENT")
+        invalid = await host.answer(question, "E")
         self.assertEqual(invalid["payload"]["code"], "INVALID_ANSWER")
-        await host.call("ANSWER", question_id=qid, answer="B")
-        duplicate = await host.call("ANSWER", question_id=qid, answer="A")
+        await host.answer(question, "B")
+        duplicate = await host.answer(question, "A")
         self.assertEqual(duplicate["payload"]["code"], "DUPLICATE_ANSWER")
         score = await guest.call("LEADERBOARD")
         self.assertEqual([r["score"] for r in score["payload"]["leaderboard"]], [0, 0])
@@ -148,7 +151,7 @@ class Gameplay(unittest.IsolatedAsyncioTestCase):
         changed = await guest.event("HOST_CHANGED_EVENT")
         self.assertEqual(changed["host_user_id"], "b")
         self.assertEqual(changed["room_code"], first)
-        await guest.call("ANSWER", question_id=qid, answer="B")
+        await guest.answer(question, "B")
         result = await guest.event("QUESTION_RESULT_EVENT")
         self.assertEqual([r["user_id"] for r in result["leaderboard"]], ["b"])
         self.assertEqual(result["leaderboard"][0]["score"], 100)
@@ -159,21 +162,22 @@ class Gameplay(unittest.IsolatedAsyncioTestCase):
         untouched = await other_host.call("PLAYER_LIST")
         self.assertEqual(untouched["payload"]["room_code"], other)
         self.assertEqual(len(untouched["payload"]["players"]), 2)
-        self.assertEqual((await other_guest.event("QUESTION_EVENT"))["number"], 1)
-        wrong_room = await guest.call("ANSWER", question_id="NET2_001", answer="B", room_code=other)
-        self.assertEqual(wrong_room["payload"]["code"], "INVALID_ANSWER")
+        other_question = await other_guest.event("QUESTION_EVENT")
+        self.assertEqual(other_question["number"], 1)
+        wrong_room = await guest.answer(other_question, "B", room_code=other)
+        self.assertEqual(wrong_room["payload"]["code"], "QUESTION_CLOSED")
 
     async def test_real_timeout_does_not_block_another_room(self):
         host, guest, fast_host, fast_guest = [await self.connect(uid) for uid in ("a", "b", "c", "d")]
         await self.room([host, guest], "network_1")
         started = asyncio.get_running_loop().time()
         first = await host.event("QUESTION_EVENT")
-        await host.call("ANSWER", question_id=first["question_id"], answer="B")
+        await host.answer(first, "B")
         await self.room([fast_host, fast_guest], "network_2")
         for _ in range(5):
             question = await fast_host.event("QUESTION_EVENT")
             for client in (fast_host, fast_guest):
-                await client.call("ANSWER", question_id=question["question_id"], answer="B")
+                await client.answer(question, "B")
         finished = await fast_host.event("QUIZ_FINISHED_EVENT")
         self.assertTrue(finished["tied"])
         result = await host.event("QUESTION_RESULT_EVENT")
@@ -181,11 +185,43 @@ class Gameplay(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["reason"], "timeout")
         self.assertEqual([r["points_awarded"] for r in result["results"]], [100, 0])
         self.assertEqual((await host.event("QUESTION_EVENT"))["number"], 2)
-        late = await guest.call("ANSWER", question_id=first["question_id"], answer="B")
+        late = await guest.answer(first, "B")
         self.assertEqual(late["payload"]["code"], "QUESTION_CLOSED")
         score = await fast_guest.call("LEADERBOARD")
         self.assertEqual(score["payload"]["state"], "FINISHED")
         self.assertEqual([r["score"] for r in score["payload"]["leaderboard"]], [500, 500])
+
+    async def test_previous_run_answer_does_not_count_in_rematch(self):
+        host, guest = await self.connect("a"), await self.connect("b")
+        await self.room([host, guest], "network_1")
+        first = await host.event("QUESTION_EVENT")
+        question = first
+        for number in range(1, 6):
+            if number > 1:
+                question = await host.event("QUESTION_EVENT")
+            for player in (host, guest):
+                reply = await player.answer(question, "B")
+                self.assertEqual(reply["type"], "ANSWER_RESPONSE")
+            await host.event("QUESTION_RESULT_EVENT")
+        await host.event("QUIZ_FINISHED_EVENT")
+
+        for player in (host, guest):
+            await player.call("READY", ready=True)
+        await host.call("START_QUIZ")
+        first_again = await host.event("QUESTION_EVENT")
+        self.assertEqual(first_again["question_id"], first["question_id"])
+        self.assertNotEqual(first_again["run_id"], first["run_id"])
+
+        stale = await host.answer(first, "B")
+        self.assertEqual(stale["payload"]["code"], "QUESTION_CLOSED")
+        current = await host.answer(first_again, "A")
+        self.assertEqual(current["type"], "ANSWER_RESPONSE")
+        self.assertEqual(current["payload"]["run_id"], first_again["run_id"])
+        await guest.answer(first_again, "B")
+        result = await host.event("QUESTION_RESULT_EVENT")
+        self.assertEqual(result["run_id"], first_again["run_id"])
+        self.assertEqual(result["results"][0]["your_answer"], "A")
+        self.assertEqual(result["results"][0]["points_awarded"], 0)
 
     async def test_lobby_host_logout_closes_room_but_not_guest_session(self):
         host, guest = await self.connect("a"), await self.connect("b")
