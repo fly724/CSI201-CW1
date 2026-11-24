@@ -2,7 +2,7 @@
 
 基于 Python 3.12 标准库和原生 TCP socket 的多人命令行答题竞赛课程项目。
 
-**当前状态：仓库初始化。** 已建立目录、参数入口、开发题库和文档提纲；网络通信、房间、计时、计分及自动化测试尚未实现。入口目前仅支持参数解析与 `--help`，传入运行参数后会明确报错退出，不会输出 `SERVER_READY`。
+**当前分支状态：M1 客户端、M2 网络会话与 M3 房间/测验/计分已接通。** 2026-11-24 在课程 Dockerfile 构建的 Python 3.12.16 容器中，81 项测试通过，包含 10 个 TCP 客户端、两个独立房间及真实 CLI 的完整比赛。本分支基于 M2 PR #1 的 `9a84b7b`；代码合并、M4/M5 联合审查、最终报告和全员演示仍待团队完成。业务规则和计时接入点见 [M3 交接](docs/member3-handoff.md)。
 
 ## 依据与范围
 
@@ -22,14 +22,14 @@ CSI201-CW1/
 ├── compose.yaml                 # 共享开发容器与源码挂载
 ├── .dockerignore                # 最小构建上下文
 ├── Codes/                       # 最终提交的代码目录
-│   ├── server.py                # 服务器命令行入口骨架
-│   ├── client.py                # 客户端命令行入口骨架
+│   ├── server.py                # 服务器命令行入口
+│   ├── client.py                # 客户端命令行入口
 │   ├── questions.json           # 开发题库：2 个 quiz，每个 5 题
 │   ├── questions_50.json        # 扩展题库：5 个 quiz，每个 10 题
-│   ├── README.md                # 启动接口、CLI 草案、假设和限制
-│   ├── common/                 # 预留：分帧、消息校验、公共常量
-│   ├── quiz_server/            # 预留：题库、会话、房间、计时与计分
-│   ├── quiz_client/            # 预留：输入解析、连接与事件显示
+│   ├── README.md                # 启动接口、CLI、规则和限制
+│   ├── common/                 # 分帧、消息校验、公共常量
+│   ├── quiz_server/            # 题库、会话、房间、计时与计分
+│   ├── quiz_client/            # 输入解析、连接与事件显示
 │   └── tests/
 │       ├── README.md           # 测试计划与证据规则
 │       ├── unit/
@@ -58,7 +58,7 @@ CSI201-CW1/
 
 ## 启动与开发
 
-完整参数、计划中的 CLI 命令和 Docker 使用方式见 [Codes/README.md](Codes/README.md)。启动 Docker 后，在仓库根目录执行：
+完整参数、CLI 命令和 Docker 使用方式见 [Codes/README.md](Codes/README.md)。启动 Docker 后，在仓库根目录执行：
 
 ```bash
 docker compose up -d --build
@@ -67,9 +67,9 @@ docker compose exec python python3 server.py --help
 docker compose exec python python3 client.py --help
 ```
 
-容器默认工作目录为 `/code/Codes`；多客户端通过 `docker compose exec` 共用一个容器。Dockerfile 和 Compose 仅是开发配置，当前业务功能仍未实现。
+容器默认工作目录为 `/code/Codes`；多客户端通过 `docker compose exec` 共用一个容器。Dockerfile 构建指令与已下载的教师环境包一致，Compose 增加了常驻开发容器设置；这些开发配置不纳入课程提交。
 
-未来实现必须支持以下接口（在容器的 `/code/Codes` 目录执行；当前尚不能启动服务）：
+服务器和客户端支持以下接口（在容器的 `/code/Codes` 目录执行）：
 
 ```bash
 python3 server.py --host <server_IP> --port <port> --questions <json_path>
@@ -96,16 +96,17 @@ python3 client.py --server <server_IP> --port <port> --id <user_id> --name <disp
 | `time_limit` | 整数，5–60 秒 |
 | `points` | 整数，1–1000 |
 
-默认按文件顺序展示 quiz 和问题。正确且被接受的答案使用该题 `points`；其他答案不得额外重复计分。每题 `time_limit` 是服务器权威时限。Python 实现时需注意 `bool` 不能被当作 JSON 整数接受。任务书未给出 1 MB 的精确字节定义，该边界应在实现前确认并记录。
+默认按文件顺序展示 quiz 和问题。正确且被接受的答案使用该题 `points`；其他答案不得额外重复计分。每题 `time_limit` 是服务器权威时限。题库校验不把 `bool` 当作整数；当前将 1 MB 解释为 1,000,000 字节，见 M2 交接。
 
 ## 开发顺序
 
 - [x] 建立仓库结构、入口骨架、示例题库与说明文档。
-- [ ] 确认协议、重复身份处理、房主离开、开赛条件及排行榜同分规则。
-- [ ] 实现全量题库校验、分帧与消息校验，并补充单元测试。
-- [ ] 实现会话、房间、客户端交互与端到端流程。
-- [ ] 实现权威计时、答案保密、计分、排行榜及异常清理。
-- [ ] 在官方 Docker 镜像中验证 10 客户端、2 房间及故障场景。
+- [x] 实现协议、重复身份处理、房主离开、开赛条件及排行榜同分规则，记录当前团队策略。
+- [x] 接入题库校验、分帧与消息校验；完整校验边界覆盖由 M5 继续验收。
+- [x] 实现会话、房间、客户端交互与端到端流程。
+- [x] 实现基础权威计时、答案保密、计分、排行榜及异常清理；M4 继续审查同步和计时。
+- [x] 在教师 Dockerfile 构建的容器中验证 10 客户端、2 房间及已列出的故障场景。
+- [ ] 合并成员分支，完成 M4/M5 联合验收和最终需求覆盖审查。
 - [ ] 完成开发报告、真实测试证据及全员参与的视频演示。
 
 ## 提交清单
