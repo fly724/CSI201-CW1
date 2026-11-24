@@ -1,6 +1,6 @@
 # Member 3 交接 · 房间、比赛流程与计分
 
-M3 业务实现在 `Codes/quiz_server/rooms.py`，接入 M2 的 `Server` 和 M1 的真实 CLI。分支 `codex/member3-room-quiz` 基于 M2 提交 `9a84b7b626c41560b78f56dc15b7aa1320a8e6f2`；M2 PR #1 尚未合并时，这个分支也会包含 M2 改动。合并顺序应为 M2 → M3，再由 M4、M5 继续联合验收。
+M3 业务在 `Codes/quiz_server/rooms.py`，接入 M2 的服务端和 M1 的命令行客户端。实现基于 M2 提交 `9a84b7b`。先合并 M2 的 PR #1，再合并 M3，随后由 M4、M5 联合验收。
 
 ## 当前业务规则
 
