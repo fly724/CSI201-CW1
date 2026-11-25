@@ -1,12 +1,16 @@
 # 测试计划
 
-当前目录仅为规划，尚无测试用例或测试结果。采用 Python 标准库 `unittest`；增加用例后，在官方 Docker 镜像的 `Codes/` 目录运行：
+采用 Python 标准库 `unittest`。在课程 Docker 环境的 `Codes/` 目录运行：
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-零条测试不代表系统通过验证。`unit/` 放题库校验、协议编解码和计分测试；`integration/` 放客户端与服务器配对流程、并发和故障测试；`fixtures/` 放测试专用题库或消息样本，客户端运行代码不能借此绕过网络读题。
+2026-11-24 在课程 Dockerfile 构建的 Python 3.12.16 容器中执行，共 86 项通过。协议 22 项、客户端 21 项、M2 网络集成 9 项、M3 房间业务 28 项、M3 配对集成 6 项。具体环境、命令、覆盖与限制见 [M3 交接](../../docs/member3-handoff.md)。
+
+`unit/` 包含协议、客户端与房间规则测试；`integration/` 包含真实 TCP、CLI 子进程、并发和故障测试；`fixtures/` 放测试专用题库或消息样本，客户端运行代码不能借此绕过网络读题。
+
+`test_rooms.py` 用可控时钟测试截止边界、重排计时和旧回调。`test_member3.py` 覆盖真实 5 秒超时、10 个 TCP 客户端的双房间比赛、两个 M1 CLI 答完整场和重赛拒收旧答案。`test_client.py` 覆盖迟到回包、200 字符选项和三种答题输入。题库校验完整边界覆盖和最终证据仍由 M5 联合验收。
 
 | 测试 ID | 计划覆盖 |
 | --- | --- |

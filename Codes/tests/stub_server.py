@@ -104,7 +104,7 @@ def handle(message_type: str, payload: dict, session: dict) -> tuple[dict | None
     if message_type == "START_QUIZ_REQUEST":
         return {"total_questions": 5}, False
     if message_type == "ANSWER_REQUEST":
-        return {"question_id": payload.get("question_id"), "number": 1}, False
+        return {"question_id": payload.get("question_id"), "run_id": payload.get("run_id"), "number": 1}, False
     if message_type == "LEADERBOARD_REQUEST":
         return {"room_code": "DEMO", "state": "LOBBY", "leaderboard": LEADERBOARD}, False
     if message_type == "LEAVE_ROOM_REQUEST":

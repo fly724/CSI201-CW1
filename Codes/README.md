@@ -1,6 +1,6 @@
 # 运行与操作说明
 
-**状态：初始化骨架，尚不可进行联网答题。** `server.py` 和 `client.py` 目前仅解析参数，支持 `--help`；普通运行会向 stderr 报告尚未实现并以状态 2 退出。没有任何功能测试通过的声明。
+**状态：M1 客户端、M2 网络会话和 M3 房间/比赛业务已接通。** 可进行建房、加入、准备、答题、计分与排行榜流程。M2 已通过 PR #1 合并到 `main`，M3 由 PR #2 审查。详细规则及 M4 计时接口见 [M3 交接](../docs/member3-handoff.md)。
 
 ## 开发环境
 
@@ -51,7 +51,7 @@ docker compose exec python python3 server.py --help
 docker compose exec python python3 client.py --help
 ```
 
-实现完成后，在一个终端启动服务器：
+在一个终端启动服务器：
 
 ```bash
 docker compose exec python python3 server.py --host 127.0.0.1 --port 5000 --questions questions_50.json
@@ -64,23 +64,23 @@ docker compose exec python python3 client.py --server 127.0.0.1 --port 5000 --id
 docker compose exec python python3 client.py --server 127.0.0.1 --port 5000 --id user02 --name Bob
 ```
 
-`5000` 为示例端口。服务器应在完整验证题库并开始监听后输出 `SERVER_READY`。当前入口仅为骨架，上述运行命令会报告尚未实现并退出。
+`5000` 为示例端口。服务器在完整验证题库并开始监听后输出 `SERVER_READY`。
 
 题库可通过 `--questions` 切换：`questions.json` 含 2 套共 10 题，`questions_50.json` 含 5 套共 50 题。最终提交仍需包含有效的 `questions.json`。
 
-增加测试用例后执行：
+执行全套测试：
 
 ```bash
 docker compose exec -T python python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-测试计划见 [tests/README.md](tests/README.md)。当前没有测试用例，零条测试不代表功能验证通过。
+也可在仓库根目录执行 `docker compose run --rm -T --entrypoint python python -B -m unittest discover -s tests -p 'test_*.py' -v`。2026-11-24 在课程 Dockerfile 构建的 Python 3.12.16 容器中，86 项测试通过，包含 10 客户端、双房间、两个真实 CLI 的完整比赛和重赛旧答案校验。覆盖与限制见 [tests/README.md](tests/README.md) 和 M3 交接。
 
-## CLI 命令草案
+## CLI 命令
 
-以下取自参考附录，供实现时采用或调整；**均未实现**。命令名不是任务书规定的强制接口，最终应与实现和开发报告同步。
+以下命令已接入 M1 客户端和 M2/M3 服务端。命令名为团队接口；开发报告须与实现保持一致。
 
-| 命令 | 计划行为 |
+| 命令 | 行为 |
 | --- | --- |
 | `/help` | 显示本地帮助 |
 | `/quizzes` | 查看公开 quiz 元数据 |
@@ -89,23 +89,28 @@ docker compose exec -T python python3 -m unittest discover -s tests -p 'test_*.p
 | `/join <room_code>` | 加入房间 |
 | `/players` | 查看成员与准备状态 |
 | `/ready` | 设置准备状态 |
+| `/notready` | 在大厅或比赛结束后撤销准备 |
 | `/start` | 房主在满足开赛条件时开始 |
 | `/answer <A\|B\|C\|D>` | 回答当前题目 |
 | `/score` | 查看排行榜 |
 | `/leave` | 离开房间 |
+| `/status` | 显示本地身份、房间与当前题状态 |
 | `/quit` | 注销并关闭连接 |
 
-计划操作流程：登录 → 查询题库 → 创建/加入房间 → 查看成员 → 准备 → 开赛 → 答题与结果 → 最终排行榜 → 离开/退出。
+操作流程：登录 → 查询题库 → 创建/加入房间 → 查看成员 → 准备 → 开赛 → 答题与结果 → 最终排行榜 → 离开/退出。
+
+默认 `questions.json` 的 quiz ID 为 `network-basics` 和 `tcp-python`；上面的 `questions_50.json` 则使用 `geography`、`history` 等 ID。先 `/quizzes` 查询实际目录，再 `/create <quiz_id>`；另一客户端 `/join <room_code>`，至少两人全部 `/ready` 后由房主 `/start`。每题用 `/answer A` 等作答，也可直接输入 A/B/C/D。
 
 ## 假设与已知限制
 
 - 正式执行的 Python 版本为 3.12；所有组件在官方容器内运行。
 - 只允许服务器读取 `questions.json`；客户端必须通过网络取得数据。
-- 当前无网络、身份验证、房间、定时器、分帧或计分实现，也没有正式测试证据。
-- 重复活跃 ID 的策略、显示名唯一性、房主断连、房间容量、开赛人数、准备撤销、重连、并列排序及关闭规则待团队确定并记录。
-- 尚未确定日志位置与资源限制；不得记录未关闭题目的答案或敏感会话标识。
-- 正常退出的目标行为为客户端 `/quit`、服务器 Ctrl+C 后释放资源，具体实现与验证待完成。
-- 当前不能作为完成版课程提交；必须先完成实现、测试和最终报告。
+- 活跃用户 ID 必须唯一，显示名可重复；重连取得新会话，不恢复旧房间和成绩。
+- 房间容量 12，至少 2 人且全部准备后由房主开赛。大厅房主离开关闭房间；比赛中或结束后由最早加入的剩余玩家接任。离房者从当前排行榜移除。
+- 只可加入大厅；结束后留场成员可重新准备并重赛，也可离开另建房间。正确答案只在关题后公布，成绩按分数降序，同分共享名次。
+- 开赛后按题库顺序自动推进；全部活跃玩家答完可提前关题。服务器用场次编号和题目编号判断答案归属，并用单调时钟判断是否超时。
+- 网络层每连接发送队列为 64 帧，单次发送超时 5 秒；不记录开放题目的答案或敏感会话标识。
+- 客户端 `/quit` 注销，服务器 Ctrl+C 停服并清理连接及房间计时器。最终提交仍需团队复测、报告、贡献说明与全员演示。
 
 ## 源码分工
 
@@ -113,10 +118,10 @@ docker compose exec -T python python3 -m unittest discover -s tests -p 'test_*.p
 
 ## Member 1：协议与客户端（已实现）
 
-`common/protocol.py` 提供分帧、信封校验与消息构造；`quiz_client/client.py` 为客户端实现，`client.py` 已接入，接口保持本节列出的 `--server --port --id --name`。单元测试在 `tests/unit/`（22 个协议测试 + 19 个客户端测试），在 `Codes/` 下执行：
+`common/protocol.py` 提供分帧、信封校验与消息构造；`quiz_client/client.py` 为客户端实现，`client.py` 已接入，接口保持本节列出的 `--server --port --id --name`。单元测试在 `tests/unit/`（22 个协议测试 + 21 个客户端测试），在 `Codes/` 下执行：
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
-参考对端 `tests/stub_server.py` 只用于单独验证客户端，不属于被评估的服务器。协议设计见 `Documentation/Member1_Protocol_and_Client.pdf`，运行记录见 `Documentation/evidence/member1/`。`quiz_server/`、题库校验与计分仍待实现。
+参考对端 `tests/stub_server.py` 只用于单独验证客户端，不属于被评估的服务器。协议设计见 `Documentation/Member1_Protocol_and_Client.pdf`，运行记录见 `Documentation/evidence/member1/`。当前配对服务器位于 `quiz_server/`；网络、房间及完整比赛的真实联调测试位于 `tests/integration/`，接口分别见 [M2 交接](../docs/member2-handoff.md) 与 [M3 交接](../docs/member3-handoff.md)。
