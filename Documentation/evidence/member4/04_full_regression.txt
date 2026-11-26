@@ -1,0 +1,151 @@
+test_real_clients_duplicate_catalog_logout_and_reconnect (integration.test_member2.PairedCli.test_real_clients_duplicate_catalog_logout_and_reconnect) ... ok
+test_cli_ready_and_login (integration.test_member2.Startup.test_cli_ready_and_login) ... ok
+test_invalid_bank_before_ready (integration.test_member2.Startup.test_invalid_bank_before_ready) ... ok
+SERVER_READY
+test_backpressure_disconnects_only_slow_peer (integration.test_member2.Transport.test_backpressure_disconnects_only_slow_peer) ... Executing <Task pending name='Task-36' coro=<Peer.write() running at /code/Codes/quiz_server/network.py:69> wait_for=<Future pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> cb=[_wait.<locals>._on_completion() at /usr/local/lib/python3.12/asyncio/tasks.py:534] created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.148 seconds
+ok
+SERVER_READY
+test_bad_frame_isolation_and_room_hook (integration.test_member2.Transport.test_bad_frame_isolation_and_room_hook) ... ok
+SERVER_READY
+test_fragmentation_coalescing_and_public_catalog (integration.test_member2.Transport.test_fragmentation_coalescing_and_public_catalog) ... ok
+SERVER_READY
+test_invalid_envelope_and_bad_frames_leave_other_session_live (integration.test_member2.Transport.test_invalid_envelope_and_bad_frames_leave_other_session_live) ... ok
+test_member1_client_envelope_compatibility (integration.test_member2.Transport.test_member1_client_envelope_compatibility)
+SERVER_READY
+Wire responses satisfy M1's six-field envelope and login contract. ... ok
+SERVER_READY
+test_ten_clients_duplicate_logout_reuse (integration.test_member2.Transport.test_ten_clients_duplicate_logout_reuse) ... ok
+SERVER_READY
+test_invalid_answers_host_disconnect_and_bad_peer_are_isolated (integration.test_member3.Gameplay.test_invalid_answers_host_disconnect_and_bad_peer_are_isolated) ... Executing <Task pending name='Task-168' coro=<Gameplay.test_invalid_answers_host_disconnect_and_bad_peer_are_isolated() running at /code/Codes/tests/integration/test_member3.py:167> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(9, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181] created at /usr/local/lib/python3.12/asyncio/runners.py:100> took 0.117 seconds
+ok
+SERVER_READY
+test_lobby_host_logout_closes_room_but_not_guest_session (integration.test_member3.Gameplay.test_lobby_host_logout_closes_room_but_not_guest_session) ... ok
+SERVER_READY
+test_previous_run_answer_does_not_count_in_rematch (integration.test_member3.Gameplay.test_previous_run_answer_does_not_count_in_rematch) ... ok
+SERVER_READY
+test_real_timeout_does_not_block_another_room (integration.test_member3.Gameplay.test_real_timeout_does_not_block_another_room) ... Executing <Task pending name='Task-227' coro=<Gameplay.test_real_timeout_does_not_block_another_room() running at /code/Codes/tests/integration/test_member3.py:183> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(7, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181] created at /usr/local/lib/python3.12/asyncio/runners.py:100> took 0.144 seconds
+ok
+SERVER_READY
+test_ten_clients_complete_two_isolated_quizzes (integration.test_member3.Gameplay.test_ten_clients_complete_two_isolated_quizzes) ... Executing <Task pending name='Task-249' coro=<Gameplay.test_ten_clients_complete_two_isolated_quizzes() running at /code/Codes/tests/integration/test_member3.py:113> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/tasks.py:712> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181] created at /usr/local/lib/python3.12/asyncio/runners.py:100> took 0.104 seconds
+ok
+test_existing_m1_cli_can_answer_all_five_questions (integration.test_member3.PairedGameplayCli.test_existing_m1_cli_can_answer_all_five_questions) ... ok
+test_sigint_with_two_active_rooms_releases_port (integration.test_member4.Interrupt.test_sigint_with_two_active_rooms_releases_port) ... ok
+SERVER_READY
+test_both_rooms_answer_concurrently_and_keep_results_separate (integration.test_member4.Reliability.test_both_rooms_answer_concurrently_and_keep_results_separate) ... Executing <Task pending name='Task-478' coro=<Reliability.test_both_rooms_answer_concurrently_and_keep_results_separate() running at /code/Codes/tests/integration/test_member4.py:38> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/tasks.py:712> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181] created at /usr/local/lib/python3.12/asyncio/runners.py:100> took 0.128 seconds
+Executing <Task pending name='Task-478' coro=<Reliability.test_both_rooms_answer_concurrently_and_keep_results_separate() running at /code/Codes/tests/integration/test_member4.py:42> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/tasks.py:712> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181] created at /usr/local/lib/python3.12/asyncio/runners.py:100> took 0.101 seconds
+Executing <Task pending name='Task-478' coro=<Reliability.test_both_rooms_answer_concurrently_and_keep_results_separate() running at /code/Codes/tests/integration/test_member4.py:38> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/tasks.py:712> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181] created at /usr/local/lib/python3.12/asyncio/runners.py:100> took 0.159 seconds
+Executing <Task pending name='Task-478' coro=<Reliability.test_both_rooms_answer_concurrently_and_keep_results_separate() running at /code/Codes/tests/integration/test_member4.py:37> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/tasks.py:712> cb=[_run_until_complete_cb() at /usr/local/lib/python3.12/asyncio/base_events.py:181] created at /usr/local/lib/python3.12/asyncio/runners.py:100> took 0.204 seconds
+Executing <Task cancelling name='Task-477' coro=<Server.serve() running at /code/Codes/quiz_server/network.py:202> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/tasks.py:712> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.12/asyncio/tasks.py:767] created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.219 seconds
+ok
+SERVER_READY
+test_coalesced_duplicate_answers_are_accepted_once (integration.test_member4.Reliability.test_coalesced_duplicate_answers_are_accepted_once) ... ok
+SERVER_READY
+test_query_burst_does_not_prevent_room_timeout (integration.test_member4.Reliability.test_query_burst_does_not_prevent_room_timeout) ... Executing <Task pending name='Task-708' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.258 seconds
+Executing <Task pending name='Task-708' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.289 seconds
+Executing <Task pending name='Task-707' coro=<Peer.write() running at /code/Codes/quiz_server/network.py:69> wait_for=<Future pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> cb=[_wait.<locals>._on_completion() at /usr/local/lib/python3.12/asyncio/tasks.py:534] created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.176 seconds
+Executing <Task pending name='Task-707' coro=<Peer.write() running at /code/Codes/quiz_server/network.py:69> wait_for=<Future pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> cb=[_wait.<locals>._on_completion() at /usr/local/lib/python3.12/asyncio/tasks.py:534] created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.186 seconds
+Executing <Task pending name='Task-708' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.250 seconds
+Executing <Task pending name='Task-708' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.267 seconds
+Executing <Task pending name='Task-708' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.331 seconds
+Executing <Task pending name='Task-708' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.310 seconds
+ok
+SERVER_READY
+test_queue_overflow_cleanup_during_play_keeps_other_room_live (integration.test_member4.Reliability.test_queue_overflow_cleanup_during_play_keeps_other_room_live) ... Executing <Task pending name='Task-721' coro=<Peer.write() running at /code/Codes/quiz_server/network.py:69> wait_for=<Future pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> cb=[_wait.<locals>._on_completion() at /usr/local/lib/python3.12/asyncio/tasks.py:534] created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.203 seconds
+ok
+SERVER_READY
+SERVER_READY
+test_shutdown_cancels_timers_without_advancing_questions (integration.test_member4.Reliability.test_shutdown_cancels_timers_without_advancing_questions) ... ok
+SERVER_READY
+test_write_timeout_removes_only_slow_host_and_releases_identity (integration.test_member4.Reliability.test_write_timeout_removes_only_slow_host_and_releases_identity) ... ok
+test_answer_requires_an_open_question (unit.test_client.CommandTests.test_answer_requires_an_open_question) ... ok
+test_non_command_text_is_rejected_politely (unit.test_client.CommandTests.test_non_command_text_is_rejected_politely) ... ok
+test_ready_toggle_and_arguments (unit.test_client.CommandTests.test_ready_toggle_and_arguments) ... ok
+test_slash_commands_map_to_requests (unit.test_client.CommandTests.test_slash_commands_map_to_requests) ... ok
+test_unknown_command_is_reported (unit.test_client.CommandTests.test_unknown_command_is_reported) ... ok
+test_empty_room_list_is_explicit (unit.test_client.RenderingTests.test_empty_room_list_is_explicit) ... ok
+test_failed_login_is_not_logged_in (unit.test_client.RenderingTests.test_failed_login_is_not_logged_in) ... ok
+test_help_text_lists_every_command (unit.test_client.RenderingTests.test_help_text_lists_every_command) ... ok
+test_invalid_envelope_is_reported_and_survived (unit.test_client.RenderingTests.test_invalid_envelope_is_reported_and_survived) ... ok
+test_login_response_records_session (unit.test_client.RenderingTests.test_login_response_records_session) ... ok
+test_player_status_event_shows_readiness (unit.test_client.RenderingTests.test_player_status_event_shows_readiness) ... ok
+test_question_event_renders_options_and_tracks_state (unit.test_client.RenderingTests.test_question_event_renders_options_and_tracks_state) ... ok
+test_question_event_shows_the_entire_option (unit.test_client.RenderingTests.test_question_event_shows_the_entire_option) ... ok
+test_question_result_closes_the_open_question (unit.test_client.RenderingTests.test_question_result_closes_the_open_question) ... ok
+test_quiz_catalogue_rendering (unit.test_client.RenderingTests.test_quiz_catalogue_rendering) ... ok
+test_reply_to_a_previous_run_keeps_current_question_open (unit.test_client.RenderingTests.test_reply_to_a_previous_run_keeps_current_question_open) ... ok
+test_tie_is_reported_as_tie (unit.test_client.RenderingTests.test_tie_is_reported_as_tie) ... ok
+test_unknown_message_type_falls_back_to_dump (unit.test_client.RenderingTests.test_unknown_message_type_falls_back_to_dump) ... ok
+[ERROR] NOT_IMPLEMENTED: REPLAY_REQUEST is not served by the stub
+test_error_response_does_not_close_the_socket (unit.test_client.StubServerTests.test_error_response_does_not_close_the_socket) ... ok
+[LOGIN] connected as Alice (user_id=alice)
+Type /help for the command list.
+[QUIZZES] 2 available
+  1. stub-a  |  Stub Quiz A  (5 questions)
+     Canned catalogue entry used by the reference peer.
+  2. stub-b  |  Stub Quiz B  (3 questions)
+     Second canned entry, three questions.
+test_login_and_catalogue_round_trip (unit.test_client.StubServerTests.test_login_and_catalogue_round_trip) ... ok
+[LOGIN] connected as Bob (user_id=bob)
+Type /help for the command list.
+[LOGOUT] session closed
+test_logout_closes_the_session (unit.test_client.StubServerTests.test_logout_closes_the_session) ... ok
+test_full_queue_requests_cancellation_only_once (unit.test_member4.Scheduling.test_full_queue_requests_cancellation_only_once) ... ok
+test_request_burst_yields_to_other_callbacks (unit.test_member4.Scheduling.test_request_burst_yields_to_other_callbacks) ... ok
+test_socket_closes_even_if_cleanup_is_cancelled_again (unit.test_member4.Scheduling.test_socket_closes_even_if_cleanup_is_cancelled_again) ... ok
+test_queued_early_close_after_room_destroy_does_nothing (unit.test_member4.Timing.test_queued_early_close_after_room_destroy_does_nothing) ... ok
+test_timeout_and_all_answered_callbacks_settle_only_once (unit.test_member4.Timing.test_timeout_and_all_answered_callbacks_settle_only_once) ... ok
+test_error_envelope_helper (unit.test_protocol.EnvelopeTests.test_error_envelope_helper) ... ok
+test_missing_field (unit.test_protocol.EnvelopeTests.test_missing_field) ... ok
+test_payload_must_be_object (unit.test_protocol.EnvelopeTests.test_payload_must_be_object) ... ok
+test_request_and_event_id_together (unit.test_protocol.EnvelopeTests.test_request_and_event_id_together) ... ok
+test_type_must_be_string (unit.test_protocol.EnvelopeTests.test_type_must_be_string) ... ok
+test_unknown_extra_envelope_field_tolerated (unit.test_protocol.EnvelopeTests.test_unknown_extra_envelope_field_tolerated) ... ok
+test_valid_event_has_no_request_id (unit.test_protocol.EnvelopeTests.test_valid_event_has_no_request_id) ... ok
+test_valid_request (unit.test_protocol.EnvelopeTests.test_valid_request) ... ok
+test_wrong_version (unit.test_protocol.EnvelopeTests.test_wrong_version) ... ok
+test_coalesced_frames_are_decoded_in_order (unit.test_protocol.FramingTests.test_coalesced_frames_are_decoded_in_order) ... ok
+test_deeply_nested_json_is_a_decode_error (unit.test_protocol.FramingTests.test_deeply_nested_json_is_a_decode_error) ... ok
+test_fragmented_frame_is_decoded_once (unit.test_protocol.FramingTests.test_fragmented_frame_is_decoded_once) ... ok
+test_invalid_utf8_is_recoverable (unit.test_protocol.FramingTests.test_invalid_utf8_is_recoverable) ... ok
+test_length_counts_bytes_not_characters (unit.test_protocol.FramingTests.test_length_counts_bytes_not_characters) ... ok
+test_malformed_json_is_a_decode_error (unit.test_protocol.FramingTests.test_malformed_json_is_a_decode_error) ... ok
+test_non_object_json_is_a_decode_error (unit.test_protocol.FramingTests.test_non_object_json_is_a_decode_error) ... ok
+test_oversized_frame_does_not_buffer (unit.test_protocol.FramingTests.test_oversized_frame_does_not_buffer) ... ok
+test_oversized_frame_is_a_framing_error (unit.test_protocol.FramingTests.test_oversized_frame_is_a_framing_error) ... ok
+test_partial_then_complete (unit.test_protocol.FramingTests.test_partial_then_complete) ... ok
+test_payload_larger_than_protocol_limit_cannot_be_encoded (unit.test_protocol.FramingTests.test_payload_larger_than_protocol_limit_cannot_be_encoded) ... ok
+test_round_trip (unit.test_protocol.FramingTests.test_round_trip) ... ok
+test_zero_length_is_a_framing_error (unit.test_protocol.FramingTests.test_zero_length_is_a_framing_error) ... ok
+test_all_answered_advances_after_handler_returns (unit.test_rooms.RoomTests.test_all_answered_advances_after_handler_returns) ... ok
+test_answer_just_before_deadline_is_accepted (unit.test_rooms.RoomTests.test_answer_just_before_deadline_is_accepted) ... ok
+test_cancelled_timeout_cannot_close_new_question (unit.test_rooms.RoomTests.test_cancelled_timeout_cannot_close_new_question) ... ok
+test_create_join_roster_and_public_listing (unit.test_rooms.RoomTests.test_create_join_roster_and_public_listing) ... ok
+test_deadline_boundary_rejects_even_when_timer_has_not_run (unit.test_rooms.RoomTests.test_deadline_boundary_rejects_even_when_timer_has_not_run) ... ok
+test_duplicate_and_invalid_answers_do_not_add_points (unit.test_rooms.RoomTests.test_duplicate_and_invalid_answers_do_not_add_points) ... ok
+test_early_timeout_followed_by_answers_does_not_close_next_question (unit.test_rooms.RoomTests.test_early_timeout_followed_by_answers_does_not_close_next_question) ... ok
+test_early_timeout_still_closes_at_deadline (unit.test_rooms.RoomTests.test_early_timeout_still_closes_at_deadline) ... ok
+test_empty_room_and_shutdown_cancel_pending_timers (unit.test_rooms.RoomTests.test_empty_room_and_shutdown_cancel_pending_timers) ... ok
+test_expiry_moves_to_next_question_and_rejects_old_answer (unit.test_rooms.RoomTests.test_expiry_moves_to_next_question_and_rejects_old_answer) ... ok
+test_guest_leaving_lobby_preserves_room (unit.test_rooms.RoomTests.test_guest_leaving_lobby_preserves_room) ... ok
+test_host_disconnect_during_quiz_promotes_oldest_remaining_player (unit.test_rooms.RoomTests.test_host_disconnect_during_quiz_promotes_oldest_remaining_player) ... ok
+test_host_leaving_lobby_closes_room_and_clears_memberships (unit.test_rooms.RoomTests.test_host_leaving_lobby_closes_room_and_clears_memberships) ... ok
+test_join_start_and_ready_are_rejected_during_play (unit.test_rooms.RoomTests.test_join_start_and_ready_are_rejected_during_play) ... ok
+test_one_session_cannot_join_or_create_two_rooms (unit.test_rooms.RoomTests.test_one_session_cannot_join_or_create_two_rooms) ... ok
+test_question_events_preserve_file_order_and_hide_answers (unit.test_rooms.RoomTests.test_question_events_preserve_file_order_and_hide_answers) ... ok
+test_ranking_ties_and_finished_answers (unit.test_rooms.RoomTests.test_ranking_ties_and_finished_answers) ... ok
+test_ready_is_boolean_and_can_be_revoked (unit.test_rooms.RoomTests.test_ready_is_boolean_and_can_be_revoked) ... ok
+test_rematch_resets_scores_and_ignores_previous_run_timer (unit.test_rooms.RoomTests.test_rematch_resets_scores_and_ignores_previous_run_timer) ... ok
+test_room_capacity (unit.test_rooms.RoomTests.test_room_capacity) ... ok
+test_room_commands_require_membership (unit.test_rooms.RoomTests.test_room_commands_require_membership) ... ok
+test_score_is_not_exposed_before_question_closes (unit.test_rooms.RoomTests.test_score_is_not_exposed_before_question_closes) ... ok
+test_stale_disconnect_does_not_remove_reconnected_identity (unit.test_rooms.RoomTests.test_stale_disconnect_does_not_remove_reconnected_identity) ... ok
+test_start_requires_two_players_host_and_readiness (unit.test_rooms.RoomTests.test_start_requires_two_players_host_and_readiness) ... ok
+test_two_rooms_have_separate_questions_answers_and_scores (unit.test_rooms.RoomTests.test_two_rooms_have_separate_questions_answers_and_scores) ... ok
+test_unanswered_player_departure_does_not_block_remaining_player (unit.test_rooms.RoomTests.test_unanswered_player_departure_does_not_block_remaining_player) ... ok
+test_unknown_quiz_room_and_invalid_payloads (unit.test_rooms.RoomTests.test_unknown_quiz_room_and_invalid_payloads) ... ok
+test_wrong_question_and_spoofed_room_are_not_used (unit.test_rooms.RoomTests.test_wrong_question_and_spoofed_room_are_not_used) ... ok
+
+----------------------------------------------------------------------
+Ran 98 tests in 45.581s
+
+OK

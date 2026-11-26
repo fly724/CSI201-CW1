@@ -25,3 +25,15 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 | T09 | 目录不泄露题目或选项，开放题目不泄露答案，客户端不读取题库 |
 
 每项用例应记录环境镜像及标签、命令、输入、预期结果、实际结果、日期、对应需求和证据路径。正式证据保存在 `Documentation/evidence/`，只有真实运行后才能填写结果。
+
+## Member 4 并发、计时与清理
+
+新增 `unit/test_member4.py` 的 5 项以及 `integration/test_member4.py` 的 7 项测试。包含 10 客户端双房间同时答题、合并重复答案、写超时故障注入、活动房间队列溢出、查询突发、取消安全清理和活动双房间 SIGINT。复用原辅助方法，不重复计入 M3 测试。Linux SIGINT 子进程用例在 Windows 下跳过，应在 Docker 运行。
+
+从仓库根目录运行：
+
+```sh
+docker compose run --rm -T --entrypoint python python -B -W always::ResourceWarning -m unittest tests.unit.test_member4 tests.integration.test_member4 -v
+```
+
+本轮 Docker Python 3.12.16 实测：原 86 项基线通过，新增 M4 的 12 项通过，全量 98 项通过（45.581 秒）。真实 SIGINT 用例已执行，没有跳过。全量输出见 `Documentation/evidence/member4/04_full_regression.txt`；设计理由、故障注入边界、环境身份及详细需求映射见 [M4 交接](../../docs/member4-handoff.md)。

@@ -1,0 +1,32 @@
+test_full_queue_requests_cancellation_only_once (tests.unit.test_member4.Scheduling.test_full_queue_requests_cancellation_only_once) ... ok
+test_request_burst_yields_to_other_callbacks (tests.unit.test_member4.Scheduling.test_request_burst_yields_to_other_callbacks) ... ok
+test_socket_closes_even_if_cleanup_is_cancelled_again (tests.unit.test_member4.Scheduling.test_socket_closes_even_if_cleanup_is_cancelled_again) ... ok
+test_queued_early_close_after_room_destroy_does_nothing (tests.unit.test_member4.Timing.test_queued_early_close_after_room_destroy_does_nothing) ... ok
+test_timeout_and_all_answered_callbacks_settle_only_once (tests.unit.test_member4.Timing.test_timeout_and_all_answered_callbacks_settle_only_once) ... ok
+test_sigint_with_two_active_rooms_releases_port (tests.integration.test_member4.Interrupt.test_sigint_with_two_active_rooms_releases_port) ... ok
+SERVER_READY
+test_both_rooms_answer_concurrently_and_keep_results_separate (tests.integration.test_member4.Reliability.test_both_rooms_answer_concurrently_and_keep_results_separate) ... Executing <Task cancelling name='Task-34' coro=<Server.serve() running at /code/Codes/quiz_server/network.py:202> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/tasks.py:712> cb=[gather.<locals>._done_callback() at /usr/local/lib/python3.12/asyncio/tasks.py:767] created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.204 seconds
+ok
+SERVER_READY
+test_coalesced_duplicate_answers_are_accepted_once (tests.integration.test_member4.Reliability.test_coalesced_duplicate_answers_are_accepted_once) ... ok
+SERVER_READY
+test_query_burst_does_not_prevent_room_timeout (tests.integration.test_member4.Reliability.test_query_burst_does_not_prevent_room_timeout) ... Executing <Task pending name='Task-265' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.226 seconds
+Executing <Task pending name='Task-265' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.234 seconds
+Executing <Task pending name='Task-265' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.449 seconds
+Executing <Task pending name='Task-265' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.315 seconds
+Executing <Task pending name='Task-265' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.457 seconds
+Executing <Task pending name='Task-265' coro=<Reliability.test_query_burst_does_not_prevent_room_timeout.<locals>.drain_flood() running at /code/Codes/tests/integration/test_member4.py:129> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_read_done(11, handle=<Handle BaseS...events.py:280>)(), Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.290 seconds
+ok
+SERVER_READY
+test_queue_overflow_cleanup_during_play_keeps_other_room_live (tests.integration.test_member4.Reliability.test_queue_overflow_cleanup_during_play_keeps_other_room_live) ... Executing <Task pending name='Task-278' coro=<Peer.write() running at /code/Codes/quiz_server/network.py:69> wait_for=<Future pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> cb=[_wait.<locals>._on_completion() at /usr/local/lib/python3.12/asyncio/tasks.py:534] created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.117 seconds
+ok
+SERVER_READY
+SERVER_READY
+test_shutdown_cancels_timers_without_advancing_questions (tests.integration.test_member4.Reliability.test_shutdown_cancels_timers_without_advancing_questions) ... ok
+SERVER_READY
+test_write_timeout_removes_only_slow_host_and_releases_identity (tests.integration.test_member4.Reliability.test_write_timeout_removes_only_slow_host_and_releases_identity) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 15.926s
+
+OK

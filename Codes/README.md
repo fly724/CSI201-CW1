@@ -1,6 +1,6 @@
 # 运行与操作说明
 
-**状态：M1 客户端、M2 网络会话和 M3 房间/比赛业务已接通。** 可进行建房、加入、准备、答题、计分与排行榜流程。M2 已通过 PR #1 合并到 `main`，M3 由 PR #2 审查。详细规则及 M4 计时接口见 [M3 交接](../docs/member3-handoff.md)。
+**状态：M1 客户端、M2 网络会话和 M3 房间/比赛业务已接通。** 可进行建房、加入、准备、答题、计分与排行榜流程。M2、M3 已分别通过 PR #1、#2 合并到 `main`。当前 M4 分支补充并发及故障清理修复，Docker 回归 98 项通过。详细规则见 [M3 交接](../docs/member3-handoff.md)，M4 改动和证据见 [M4 交接](../docs/member4-handoff.md)。
 
 ## 开发环境
 
@@ -77,6 +77,8 @@ docker compose exec -T python python3 -m unittest discover -s tests -p 'test_*.p
 也可在仓库根目录执行 `docker compose run --rm -T --entrypoint python python -B -m unittest discover -s tests -p 'test_*.py' -v`。2026-11-24 在课程 Dockerfile 构建的 Python 3.12.16 容器中，86 项测试通过，包含 10 客户端、双房间、两个真实 CLI 的完整比赛和重赛旧答案校验。覆盖与限制见 [tests/README.md](tests/README.md) 和 M3 交接。
 
 ## CLI 命令
+
+M4 已补充有界请求调度、连接取消与资源释放、停服顺序以及并发/健壮性测试。生产接口、CLI 和比赛规则保持一致。具体改动、测试证据及环境核验限制见 [M4 交接](../docs/member4-handoff.md)。
 
 以下命令已接入 M1 客户端和 M2/M3 服务端。命令名为团队接口；开发报告须与实现保持一致。
 

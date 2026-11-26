@@ -1,0 +1,56 @@
+test_full_queue_requests_cancellation_only_once (tests.unit.test_member4.Scheduling.test_full_queue_requests_cancellation_only_once) ... FAIL
+test_request_burst_yields_to_other_callbacks (tests.unit.test_member4.Scheduling.test_request_burst_yields_to_other_callbacks) ... FAIL
+test_socket_closes_even_if_cleanup_is_cancelled_again (tests.unit.test_member4.Scheduling.test_socket_closes_even_if_cleanup_is_cancelled_again) ... FAIL
+test_queued_early_close_after_room_destroy_does_nothing (tests.unit.test_member4.Timing.test_queued_early_close_after_room_destroy_does_nothing) ... ok
+test_timeout_and_all_answered_callbacks_settle_only_once (tests.unit.test_member4.Timing.test_timeout_and_all_answered_callbacks_settle_only_once) ... ok
+
+======================================================================
+FAIL: test_full_queue_requests_cancellation_only_once (tests.unit.test_member4.Scheduling.test_full_queue_requests_cancellation_only_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/code/Codes/tests/unit/test_member4.py", line 83, in test_full_queue_requests_cancellation_only_once
+    peer.task.cancel.assert_called_once()
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 928, in assert_called_once
+    raise AssertionError(msg)
+AssertionError: Expected 'cancel' to have been called once. Called 3 times.
+Calls: [call(), call(), call()].
+
+======================================================================
+FAIL: test_request_burst_yields_to_other_callbacks (tests.unit.test_member4.Scheduling.test_request_burst_yields_to_other_callbacks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/code/Codes/tests/unit/test_member4.py", line 74, in test_request_burst_yields_to_other_callbacks
+    self.assertLess(seen[0], 1000, "A ready callback must run before the burst completes")
+AssertionError: 1000 not less than 1000 : A ready callback must run before the burst completes
+
+======================================================================
+FAIL: test_socket_closes_even_if_cleanup_is_cancelled_again (tests.unit.test_member4.Scheduling.test_socket_closes_even_if_cleanup_is_cancelled_again)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/code/Codes/tests/unit/test_member4.py", line 112, in test_socket_closes_even_if_cleanup_is_cancelled_again
+    self.assertEqual(sock.fileno(), -1)
+AssertionError: 6 != -1
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.103s
+
+FAILED (failures=3)
+
