@@ -1,0 +1,117 @@
+ Network csi201-cw1_default  Creating
+ Network csi201-cw1_default  Created
+test_error_envelope_helper (tests.unit.test_protocol.EnvelopeTests.test_error_envelope_helper) ... ok
+test_missing_field (tests.unit.test_protocol.EnvelopeTests.test_missing_field) ... ok
+test_payload_must_be_object (tests.unit.test_protocol.EnvelopeTests.test_payload_must_be_object) ... ok
+test_request_and_event_id_together (tests.unit.test_protocol.EnvelopeTests.test_request_and_event_id_together) ... ok
+test_type_must_be_string (tests.unit.test_protocol.EnvelopeTests.test_type_must_be_string) ... ok
+test_unknown_extra_envelope_field_tolerated (tests.unit.test_protocol.EnvelopeTests.test_unknown_extra_envelope_field_tolerated) ... ok
+test_valid_event_has_no_request_id (tests.unit.test_protocol.EnvelopeTests.test_valid_event_has_no_request_id) ... ok
+test_valid_request (tests.unit.test_protocol.EnvelopeTests.test_valid_request) ... ok
+test_wrong_version (tests.unit.test_protocol.EnvelopeTests.test_wrong_version) ... ok
+test_coalesced_frames_are_decoded_in_order (tests.unit.test_protocol.FramingTests.test_coalesced_frames_are_decoded_in_order) ... ok
+test_deeply_nested_json_is_a_decode_error (tests.unit.test_protocol.FramingTests.test_deeply_nested_json_is_a_decode_error) ... ok
+test_fragmented_frame_is_decoded_once (tests.unit.test_protocol.FramingTests.test_fragmented_frame_is_decoded_once) ... ok
+test_invalid_utf8_is_recoverable (tests.unit.test_protocol.FramingTests.test_invalid_utf8_is_recoverable) ... ok
+test_length_counts_bytes_not_characters (tests.unit.test_protocol.FramingTests.test_length_counts_bytes_not_characters) ... ok
+test_malformed_json_is_a_decode_error (tests.unit.test_protocol.FramingTests.test_malformed_json_is_a_decode_error) ... ok
+test_non_object_json_is_a_decode_error (tests.unit.test_protocol.FramingTests.test_non_object_json_is_a_decode_error) ... ok
+test_oversized_frame_does_not_buffer (tests.unit.test_protocol.FramingTests.test_oversized_frame_does_not_buffer) ... ok
+test_oversized_frame_is_a_framing_error (tests.unit.test_protocol.FramingTests.test_oversized_frame_is_a_framing_error) ... ok
+test_partial_then_complete (tests.unit.test_protocol.FramingTests.test_partial_then_complete) ... ok
+test_payload_larger_than_protocol_limit_cannot_be_encoded (tests.unit.test_protocol.FramingTests.test_payload_larger_than_protocol_limit_cannot_be_encoded) ... ok
+test_round_trip (tests.unit.test_protocol.FramingTests.test_round_trip) ... ok
+test_zero_length_is_a_framing_error (tests.unit.test_protocol.FramingTests.test_zero_length_is_a_framing_error) ... ok
+test_answer_requires_an_open_question (tests.unit.test_client.CommandTests.test_answer_requires_an_open_question) ... ok
+test_non_command_text_is_rejected_politely (tests.unit.test_client.CommandTests.test_non_command_text_is_rejected_politely) ... ok
+test_ready_toggle_and_arguments (tests.unit.test_client.CommandTests.test_ready_toggle_and_arguments) ... ok
+test_slash_commands_map_to_requests (tests.unit.test_client.CommandTests.test_slash_commands_map_to_requests) ... ok
+test_unknown_command_is_reported (tests.unit.test_client.CommandTests.test_unknown_command_is_reported) ... ok
+test_empty_room_list_is_explicit (tests.unit.test_client.RenderingTests.test_empty_room_list_is_explicit) ... ok
+test_failed_login_is_not_logged_in (tests.unit.test_client.RenderingTests.test_failed_login_is_not_logged_in) ... ok
+test_help_text_lists_every_command (tests.unit.test_client.RenderingTests.test_help_text_lists_every_command) ... ok
+test_invalid_envelope_is_reported_and_survived (tests.unit.test_client.RenderingTests.test_invalid_envelope_is_reported_and_survived) ... ok
+test_login_response_records_session (tests.unit.test_client.RenderingTests.test_login_response_records_session) ... ok
+test_player_status_event_shows_readiness (tests.unit.test_client.RenderingTests.test_player_status_event_shows_readiness) ... ok
+test_question_event_renders_options_and_tracks_state (tests.unit.test_client.RenderingTests.test_question_event_renders_options_and_tracks_state) ... ok
+test_question_event_shows_the_entire_option (tests.unit.test_client.RenderingTests.test_question_event_shows_the_entire_option) ... ok
+test_question_result_closes_the_open_question (tests.unit.test_client.RenderingTests.test_question_result_closes_the_open_question) ... ok
+test_quiz_catalogue_rendering (tests.unit.test_client.RenderingTests.test_quiz_catalogue_rendering) ... ok
+test_reply_to_a_previous_run_keeps_current_question_open (tests.unit.test_client.RenderingTests.test_reply_to_a_previous_run_keeps_current_question_open) ... ok
+test_tie_is_reported_as_tie (tests.unit.test_client.RenderingTests.test_tie_is_reported_as_tie) ... ok
+test_unknown_message_type_falls_back_to_dump (tests.unit.test_client.RenderingTests.test_unknown_message_type_falls_back_to_dump) ... ok
+[ERROR] NOT_IMPLEMENTED: REPLAY_REQUEST is not served by the stub
+test_error_response_does_not_close_the_socket (tests.unit.test_client.StubServerTests.test_error_response_does_not_close_the_socket) ... ok
+[LOGIN] connected as Alice (user_id=alice)
+Type /help for the command list.
+[QUIZZES] 2 available
+  1. stub-a  |  Stub Quiz A  (5 questions)
+     Canned catalogue entry used by the reference peer.
+  2. stub-b  |  Stub Quiz B  (3 questions)
+     Second canned entry, three questions.
+test_login_and_catalogue_round_trip (tests.unit.test_client.StubServerTests.test_login_and_catalogue_round_trip) ... ok
+[LOGIN] connected as Bob (user_id=bob)
+Type /help for the command list.
+[LOGOUT] session closed
+test_logout_closes_the_session (tests.unit.test_client.StubServerTests.test_logout_closes_the_session) ... ok
+test_all_answered_advances_after_handler_returns (tests.unit.test_rooms.RoomTests.test_all_answered_advances_after_handler_returns) ... ok
+test_answer_just_before_deadline_is_accepted (tests.unit.test_rooms.RoomTests.test_answer_just_before_deadline_is_accepted) ... ok
+test_cancelled_timeout_cannot_close_new_question (tests.unit.test_rooms.RoomTests.test_cancelled_timeout_cannot_close_new_question) ... ok
+test_create_join_roster_and_public_listing (tests.unit.test_rooms.RoomTests.test_create_join_roster_and_public_listing) ... ok
+test_deadline_boundary_rejects_even_when_timer_has_not_run (tests.unit.test_rooms.RoomTests.test_deadline_boundary_rejects_even_when_timer_has_not_run) ... ok
+test_duplicate_and_invalid_answers_do_not_add_points (tests.unit.test_rooms.RoomTests.test_duplicate_and_invalid_answers_do_not_add_points) ... ok
+test_early_timeout_followed_by_answers_does_not_close_next_question (tests.unit.test_rooms.RoomTests.test_early_timeout_followed_by_answers_does_not_close_next_question) ... ok
+test_early_timeout_still_closes_at_deadline (tests.unit.test_rooms.RoomTests.test_early_timeout_still_closes_at_deadline) ... ok
+test_empty_room_and_shutdown_cancel_pending_timers (tests.unit.test_rooms.RoomTests.test_empty_room_and_shutdown_cancel_pending_timers) ... ok
+test_expiry_moves_to_next_question_and_rejects_old_answer (tests.unit.test_rooms.RoomTests.test_expiry_moves_to_next_question_and_rejects_old_answer) ... ok
+test_guest_leaving_lobby_preserves_room (tests.unit.test_rooms.RoomTests.test_guest_leaving_lobby_preserves_room) ... ok
+test_host_disconnect_during_quiz_promotes_oldest_remaining_player (tests.unit.test_rooms.RoomTests.test_host_disconnect_during_quiz_promotes_oldest_remaining_player) ... ok
+test_host_leaving_lobby_closes_room_and_clears_memberships (tests.unit.test_rooms.RoomTests.test_host_leaving_lobby_closes_room_and_clears_memberships) ... ok
+test_join_start_and_ready_are_rejected_during_play (tests.unit.test_rooms.RoomTests.test_join_start_and_ready_are_rejected_during_play) ... ok
+test_one_session_cannot_join_or_create_two_rooms (tests.unit.test_rooms.RoomTests.test_one_session_cannot_join_or_create_two_rooms) ... ok
+test_question_events_preserve_file_order_and_hide_answers (tests.unit.test_rooms.RoomTests.test_question_events_preserve_file_order_and_hide_answers) ... ok
+test_ranking_ties_and_finished_answers (tests.unit.test_rooms.RoomTests.test_ranking_ties_and_finished_answers) ... ok
+test_ready_is_boolean_and_can_be_revoked (tests.unit.test_rooms.RoomTests.test_ready_is_boolean_and_can_be_revoked) ... ok
+test_rematch_resets_scores_and_ignores_previous_run_timer (tests.unit.test_rooms.RoomTests.test_rematch_resets_scores_and_ignores_previous_run_timer) ... ok
+test_room_capacity (tests.unit.test_rooms.RoomTests.test_room_capacity) ... ok
+test_room_commands_require_membership (tests.unit.test_rooms.RoomTests.test_room_commands_require_membership) ... ok
+test_score_is_not_exposed_before_question_closes (tests.unit.test_rooms.RoomTests.test_score_is_not_exposed_before_question_closes) ... ok
+test_stale_disconnect_does_not_remove_reconnected_identity (tests.unit.test_rooms.RoomTests.test_stale_disconnect_does_not_remove_reconnected_identity) ... ok
+test_start_requires_two_players_host_and_readiness (tests.unit.test_rooms.RoomTests.test_start_requires_two_players_host_and_readiness) ... ok
+test_two_rooms_have_separate_questions_answers_and_scores (tests.unit.test_rooms.RoomTests.test_two_rooms_have_separate_questions_answers_and_scores) ... ok
+test_unanswered_player_departure_does_not_block_remaining_player (tests.unit.test_rooms.RoomTests.test_unanswered_player_departure_does_not_block_remaining_player) ... ok
+test_unknown_quiz_room_and_invalid_payloads (tests.unit.test_rooms.RoomTests.test_unknown_quiz_room_and_invalid_payloads) ... ok
+test_wrong_question_and_spoofed_room_are_not_used (tests.unit.test_rooms.RoomTests.test_wrong_question_and_spoofed_room_are_not_used) ... ok
+test_real_clients_duplicate_catalog_logout_and_reconnect (tests.integration.test_member2.PairedCli.test_real_clients_duplicate_catalog_logout_and_reconnect) ... ok
+test_cli_ready_and_login (tests.integration.test_member2.Startup.test_cli_ready_and_login) ... ok
+test_invalid_bank_before_ready (tests.integration.test_member2.Startup.test_invalid_bank_before_ready) ... ok
+SERVER_READY
+test_backpressure_disconnects_only_slow_peer (tests.integration.test_member2.Transport.test_backpressure_disconnects_only_slow_peer) ... Executing <Task pending name='Task-36' coro=<Peer.write() running at /code/Codes/quiz_server/network.py:63> wait_for=<Future pending cb=[Task.task_wakeup()] created at /usr/local/lib/python3.12/asyncio/base_events.py:448> cb=[_wait.<locals>._on_completion() at /usr/local/lib/python3.12/asyncio/tasks.py:534] created at /usr/local/lib/python3.12/asyncio/tasks.py:420> took 0.102 seconds
+ok
+SERVER_READY
+test_bad_frame_isolation_and_room_hook (tests.integration.test_member2.Transport.test_bad_frame_isolation_and_room_hook) ... ok
+SERVER_READY
+test_fragmentation_coalescing_and_public_catalog (tests.integration.test_member2.Transport.test_fragmentation_coalescing_and_public_catalog) ... ok
+SERVER_READY
+test_invalid_envelope_and_bad_frames_leave_other_session_live (tests.integration.test_member2.Transport.test_invalid_envelope_and_bad_frames_leave_other_session_live) ... ok
+test_member1_client_envelope_compatibility (tests.integration.test_member2.Transport.test_member1_client_envelope_compatibility)
+SERVER_READY
+Wire responses satisfy M1's six-field envelope and login contract. ... ok
+SERVER_READY
+test_ten_clients_duplicate_logout_reuse (tests.integration.test_member2.Transport.test_ten_clients_duplicate_logout_reuse) ... ok
+SERVER_READY
+test_invalid_answers_host_disconnect_and_bad_peer_are_isolated (tests.integration.test_member3.Gameplay.test_invalid_answers_host_disconnect_and_bad_peer_are_isolated) ... ok
+SERVER_READY
+test_lobby_host_logout_closes_room_but_not_guest_session (tests.integration.test_member3.Gameplay.test_lobby_host_logout_closes_room_but_not_guest_session) ... ok
+SERVER_READY
+test_previous_run_answer_does_not_count_in_rematch (tests.integration.test_member3.Gameplay.test_previous_run_answer_does_not_count_in_rematch) ... ok
+SERVER_READY
+test_real_timeout_does_not_block_another_room (tests.integration.test_member3.Gameplay.test_real_timeout_does_not_block_another_room) ... ok
+SERVER_READY
+test_ten_clients_complete_two_isolated_quizzes (tests.integration.test_member3.Gameplay.test_ten_clients_complete_two_isolated_quizzes) ... ok
+test_existing_m1_cli_can_answer_all_five_questions (tests.integration.test_member3.PairedGameplayCli.test_existing_m1_cli_can_answer_all_five_questions) ... ok
+
+----------------------------------------------------------------------
+Ran 86 tests in 19.829s
+
+OK

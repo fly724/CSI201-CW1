@@ -13,6 +13,8 @@ ROOM_REQUESTS = {
     "LEAVE_ROOM_REQUEST", "READY_REQUEST", "START_QUIZ_REQUEST",
     "ANSWER_REQUEST", "LEADERBOARD_REQUEST", "PLAYER_LIST_REQUEST",
 }
+READ_BATCH_SIZE = 16
+WRITE_TIMEOUT = 5
 
 
 async def messages(sock):
@@ -49,9 +51,13 @@ class Peer:
         self.session = None
         self.out = asyncio.Queue(maxsize=64)
         self.task = None
+        self.closing = False
 
     def send(self, message):
+        if self.closing:
+            return False
         if self.out.full():
+            self.closing = True
             self.task.cancel()
             return False
         self.out.put_nowait(protocol.encode_message(message))
@@ -62,7 +68,7 @@ class Peer:
         while True:
             frame = await self.out.get()
             try:
-                await asyncio.wait_for(loop.sock_sendall(self.sock, frame), 5)
+                await asyncio.wait_for(loop.sock_sendall(self.sock, frame), WRITE_TIMEOUT)
             finally:
                 self.out.task_done()
 
@@ -110,6 +116,7 @@ class Server:
         raise RequestError("UNKNOWN_REQUEST")
 
     async def read(self, peer):
+        processed = 0
         async for request in messages(peer.sock):
             rid = request.get("request_id")
             if not valid_text(rid) or len(rid) > 64:
@@ -132,6 +139,11 @@ class Server:
                 self.detach(peer)
                 await peer.out.join()
                 return
+            processed += 1
+            if processed >= READ_BATCH_SIZE:
+                # Buffered requests must not monopolise the loop or starve room timers.
+                processed = 0
+                await asyncio.sleep(0)
 
     def detach(self, peer):
         session = peer.session
@@ -152,13 +164,17 @@ class Server:
         except Exception:
             logging.exception("Connection handler failed")
         finally:
+            peer.closing = True
             reader.cancel()
             writer.cancel()
             try:
                 self.detach(peer)
             finally:
-                await asyncio.gather(reader, writer, return_exceptions=True)
-                peer.sock.close()
+                try:
+                    await asyncio.gather(reader, writer, return_exceptions=True)
+                finally:
+                    # A second cancellation must not skip releasing the raw socket.
+                    peer.sock.close()
 
     async def serve(self, host, port):
         loop = asyncio.get_running_loop()
@@ -178,7 +194,9 @@ class Server:
                     peer.task.add_done_callback(self.tasks.discard)
             finally:
                 listener.close()
-                for task in self.tasks:
-                    task.cancel()
-                await asyncio.gather(*self.tasks, return_exceptions=True)
+                # Stop gameplay first: disconnect cleanup must not advance a quiz on shutdown.
                 self.rooms.close()
+                tasks = tuple(self.tasks)
+                for task in tasks:
+                    task.cancel()
+                await asyncio.gather(*tasks, return_exceptions=True)
